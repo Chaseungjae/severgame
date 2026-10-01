@@ -1,0 +1,58 @@
+# Unity generated
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Builds (share the zip separately, not through git)
+[Bb]uild/
+[Bb]uilds/
+*.apk
+*.aab
+*_BurstDebugInformation_DoNotShip/
+
+# IDE / generated project files
+.vs/
+.vscode/
+.idea/
+.utmp/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+ExportedObj/
+.consulo/
+
+# Crash reports / misc
+sysinfo.txt
+crashlytics-build.properties
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Editor test screenshots
+Assets/Screenshots/
+Assets/Screenshots.meta
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# local backups
+*.bak
+
+# Unity crash recovery scenes
+Assets/_Recovery/
+Assets/_Recovery.meta
