@@ -9,8 +9,8 @@ using UnityEngine.UI;
 namespace MiniParty
 {
     /// <summary>
-    /// Step 1: character select. Two modes:
-    ///  - Local: two players share one PC (either side can be CPU).
+    /// Step 1: character select. One PC is always one human player. Two modes:
+    ///  - CPU 대전: you vs the CPU (P1 can also be set to CPU to watch a CPU vs CPU test match).
     ///  - Online: pick your character, then play a friend:
     ///      빠른 매칭 (any open room) · 방 만들기 → share the code · 코드로 참가 · IP 직접 연결 (LAN / VPN).
     /// </summary>
@@ -94,7 +94,7 @@ namespace MiniParty
 
             BuildOnlinePanel();
 
-            modeButtons[0] = UIKit.Button("Local", transform, "로컬 2인 (한 PC)", new Vector2(-170, -470), new Vector2(320, 64), 28, Palette.PanelLight, () => SetMode(false)).GetComponent<Image>();
+            modeButtons[0] = UIKit.Button("Local", transform, "CPU 대전", new Vector2(-170, -470), new Vector2(320, 64), 28, Palette.PanelLight, () => SetMode(false)).GetComponent<Image>();
             modeButtons[1] = UIKit.Button("Online", transform, "온라인 1:1", new Vector2(170, -470), new Vector2(320, 64), 28, Palette.PanelLight, () => SetMode(true)).GetComponent<Image>();
         }
 
@@ -355,12 +355,15 @@ namespace MiniParty
             if (view == View.Busy || view == View.Matched) return;
             online = isOnline;
             onlinePanel.gameObject.SetActive(online);
-            for (int p = 0; p < 2; p++) cpuButtons[p].SetActive(!online);
+            cpuButtons[0].SetActive(!online);
+            cpuButtons[1].SetActive(false);
+            if (!online) Cpu[1] = true; // the opponent on this PC is always the CPU
             modeButtons[0].color = online ? Palette.PanelLight : Palette.Hex("#4C8DFF");
             modeButtons[1].color = online ? Palette.Hex("#4C8DFF") : Palette.PanelLight;
-            tags[0].text = online ? "나" : "P1";
-            hints[0].text = online ? "◀ ▶ 버튼 또는 A/D · ←/→ 로 캐릭터 변경" : "A / D 캐릭터 변경 · Space 준비";
-            hints[1].text = "← / → 캐릭터 변경 · Enter 준비";
+            tags[0].text = "나";
+            tags[1].text = "CPU";
+            hints[0].text = online ? "◀ ▶ 버튼 또는 A/D · ←/→ 로 캐릭터 변경" : "A/D · ←/→ 캐릭터 변경 · Space/Enter 준비";
+            hints[1].text = "◀ ▶ 버튼으로 상대 캐릭터 변경";
             ready[0] = !online && Cpu[0];
             ready[1] = !online && Cpu[1];
             if (online) Show(View.Menu);
@@ -379,7 +382,7 @@ namespace MiniParty
 
         void ToggleCpu(int p)
         {
-            if (online) return;
+            if (online || p == 1) return; // the opponent on this PC is always the CPU
             Cpu[p] = !Cpu[p];
             ready[p] = Cpu[p];
             RefreshStatus(p);
@@ -419,6 +422,7 @@ namespace MiniParty
 
         public IEnumerator Run(PlayerData[] players)
         {
+            Cpu[1] = true;
             SetMode(false);
             for (int p = 0; p < 2; p++)
             {
@@ -456,16 +460,15 @@ namespace MiniParty
                 else
                 {
                     if (ready[0] && ready[1]) break;
-                    for (int p = 0; p < 2; p++)
+                    if (!Cpu[0])
                     {
-                        if (Cpu[p]) continue;
-                        if (Controls.Left(p)) Change(p, -1);
-                        if (Controls.Right(p)) Change(p, 1);
-                        if (Controls.Confirm(p))
+                        if (Controls.Left(0) || Controls.Left(1)) Change(0, -1);
+                        if (Controls.Right(0) || Controls.Right(1)) Change(0, 1);
+                        if (Controls.AnyConfirm)
                         {
-                            ready[p] = !ready[p];
-                            RefreshStatus(p);
-                            if (ready[p]) StartCoroutine(previews[p].Jump(60, 0.3f));
+                            ready[0] = !ready[0];
+                            RefreshStatus(0);
+                            if (ready[0]) StartCoroutine(previews[0].Jump(60, 0.3f));
                         }
                     }
                 }
@@ -489,6 +492,7 @@ namespace MiniParty
                 {
                     players[p].Character = Roster.All[selection[p]];
                     players[p].IsCpu = Cpu[p];
+                    players[p].IsYou = !Cpu[p];
                     previews[p].SetFace(CharacterView.Face.Happy);
                     StartCoroutine(previews[p].Jump(100, 0.4f));
                 }

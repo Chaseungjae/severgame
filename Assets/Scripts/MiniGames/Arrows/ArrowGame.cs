@@ -12,8 +12,7 @@ namespace MiniParty
     {
         public override string Title => "방향키 입력 대결";
         public override string Rules => "화면에 나온 방향키를 순서대로 입력하세요!\n틀리면 그 줄은 처음부터 다시 (잠깐 멈춤)\n7줄을 먼저 끝내는 사람이 승리 · 뒤로 갈수록 길어집니다";
-        public override string ControlsText => "P1   W A S D\nP2   ↑ ← ↓ →";
-        public override string OnlineControlsText => "W A S D 또는 방향키";
+        public override string ControlsText => "W A S D 또는 방향키";
 
         static readonly int[] Lengths = { 4, 5, 5, 6, 7, 8, 9 };
         static readonly string[] Glyph = { "↑", "→", "↓", "←" };
@@ -56,7 +55,7 @@ namespace MiniParty
                 lane.Progress.rectTransform.Place(new Vector2(0, 170), new Vector2(500, 70));
                 lane.Row = UIKit.Rect("Row", lane.Panel);
                 lane.Row.Place(new Vector2(0, 20), new Vector2(800, 90));
-                UIKit.Label("Hint", lane.Panel, Online ? "W A S D / 방향키" : p == 0 ? "W A S D" : "방향키", 28, Palette.Muted, style: FontStyle.Normal)
+                UIKit.Label("Hint", lane.Panel, "W A S D / 방향키", 28, Palette.Muted, style: FontStyle.Normal)
                     .rectTransform.Place(new Vector2(0, -130), new Vector2(400, 40));
                 ShowCombo(lane);
             }

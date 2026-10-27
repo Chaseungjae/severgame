@@ -15,15 +15,13 @@ namespace MiniParty
     {
         public override string Title => "공 개수 세기";
         public override string Rules => "움직이는 공 중에서 제시된 색의 공이 몇 개인지 세세요!\n공이 사라지면 개수를 입력 — 정답에 더 가까운 사람이 승리\n(같으면 먼저 입력한 사람) · 3판 2선승";
-        public override string ControlsText => "P1   W / S 숫자 조절 · Space 확정\nP2   ↑ / ↓ 숫자 조절 · Enter 확정";
-        public override string OnlineControlsText => "W / S 또는 ↑ / ↓ 숫자 조절 · Space 확정";
+        public override string ControlsText => "숫자키로 개수 입력 · Enter(또는 Space) 확정 · Backspace 지우기";
 
         const int WinsNeeded = 2;
         const float WatchTime = 6f;
         const float AnswerTime = 7f;
         const float ArenaW = 1400f, ArenaH = 470f;
         const float BallSize = 54f;
-        const int StartValue = 10;
 
         const int ActRoundStart = 1; // system: A = round number
         const int ActAnswer = 2;     // player: A = round * 1000 + value, F = lock time
@@ -49,9 +47,9 @@ namespace MiniParty
         {
             public RectTransform Panel;
             public Text Value, Status, Diff;
-            public int Current = StartValue;
+            public int Current = -1; // -1 = nothing typed yet
             public bool Locked;
-            public float HoldTimer;
+            public Text Hint;
             public readonly Image[] Pips = new Image[WinsNeeded];
         }
 
@@ -99,9 +97,8 @@ namespace MiniParty
                 pickers[p] = pk;
                 pk.Value = UIKit.Label("Value", pk.Panel, "", 96, Color.white);
                 pk.Value.rectTransform.Place(new Vector2(0, -20), new Vector2(300, 120));
-                string up = Online ? "W/↑" : p == 0 ? "W" : "↑", down = Online ? "S/↓" : p == 0 ? "S" : "↓";
-                UIKit.Label("Up", pk.Panel, $"▲ {up}", 26, Palette.Muted).rectTransform.Place(new Vector2(-220, 10), new Vector2(160, 40));
-                UIKit.Label("Down", pk.Panel, $"▼ {down}", 26, Palette.Muted).rectTransform.Place(new Vector2(-220, -45), new Vector2(160, 40));
+                pk.Hint = UIKit.Label("Hint", pk.Panel, "", 24, Palette.Muted, style: FontStyle.Normal);
+                pk.Hint.rectTransform.Place(new Vector2(-215, -20), new Vector2(180, 90));
                 pk.Status = UIKit.Label("Status", pk.Panel, "", 30, Palette.Muted);
                 pk.Status.rectTransform.Place(new Vector2(0, -100), new Vector2(500, 44));
                 pk.Diff = UIKit.Label("Diff", pk.Panel, "", 34, Palette.Gold);
@@ -121,11 +118,12 @@ namespace MiniParty
             for (int p = 0; p < 2; p++)
             {
                 var pk = pickers[p];
-                pk.Current = StartValue;
+                pk.Current = -1;
                 pk.Locked = false;
-                pk.Value.text = !active ? "-" : IsLocal(p) ? pk.Current.ToString() : "?";
+                pk.Value.text = !active ? "-" : IsHumanHere(p) ? "_" : "?"; // only your own number is visible
                 pk.Value.color = Color.white;
-                pk.Status.text = active ? (IsLocal(p) ? "개수를 입력하세요" : "상대 입력 중...") : "공을 세는 중...";
+                pk.Hint.text = active && IsHumanHere(p) ? "숫자 입력\nEnter 확정" : "";
+                pk.Status.text = active ? (IsHumanHere(p) ? "개수를 입력하세요" : "상대 입력 중...") : "공을 세는 중...";
                 pk.Status.color = Palette.Muted;
                 pk.Diff.text = "";
             }
@@ -188,7 +186,7 @@ namespace MiniParty
                     pk.Locked = true;
                     pk.Status.text = "확정!";
                     pk.Status.color = Palette.Green;
-                    if (!IsLocal(p)) pk.Value.text = "?"; // keep the opponent's answer hidden until the reveal
+                    if (!IsHumanHere(p)) pk.Value.text = "?"; // keep the opponent's answer hidden until the reveal
                     StartCoroutine(Tween.Pop(pk.Status.transform, 1.4f, 0.2f));
                     if (IsAuthority) TryResolve();
                     break;
@@ -316,39 +314,26 @@ namespace MiniParty
         void UpdateHumanPicker(int p)
         {
             var pk = pickers[p];
-            int delta = 0;
-            if (InUp(p)) { delta = 1; pk.HoldTimer = 0.35f; }
-            else if (InDown(p)) { delta = -1; pk.HoldTimer = 0.35f; }
-            else if (InUpHeld(p) || InDownHeld(p))
+            int d = Controls.AnyDigit();
+            if (d >= 0)
             {
-                pk.HoldTimer -= Time.deltaTime;
-                if (pk.HoldTimer <= 0f)
-                {
-                    delta = InUpHeld(p) ? 1 : -1;
-                    pk.HoldTimer = 0.07f;
-                }
-            }
-            if (delta != 0)
-            {
-                pk.Current = Mathf.Clamp(pk.Current + delta, 0, 99);
+                pk.Current = pk.Current < 0 || pk.Current >= 10 ? d : pk.Current * 10 + d; // two digits max
                 pk.Value.text = pk.Current.ToString();
                 StartCoroutine(Tween.Pop(pk.Value.transform, 1.15f, 0.1f));
             }
-            if (InConfirm(p)) Lock(p);
+            else if (Controls.Backspace && pk.Current >= 0)
+            {
+                pk.Current = pk.Current >= 10 ? pk.Current / 10 : -1;
+                pk.Value.text = pk.Current < 0 ? "_" : pk.Current.ToString();
+            }
+            if (InConfirm(p) && pk.Current >= 0) Lock(p);
         }
 
         void UpdateCpuPicker(int p)
         {
-            var pk = pickers[p];
-            // tick toward the guess, then lock in
-            pk.HoldTimer -= Time.deltaTime;
-            if (pk.HoldTimer <= 0f && pk.Current != cpuGuess[p])
-            {
-                pk.Current += pk.Current < cpuGuess[p] ? 1 : -1;
-                pk.Value.text = pk.Current.ToString();
-                pk.HoldTimer = 0.12f;
-            }
-            if (phaseTime >= cpuLockAt[p] && pk.Current == cpuGuess[p]) Lock(p);
+            if (phaseTime < cpuLockAt[p]) return;
+            pickers[p].Current = cpuGuess[p];
+            Lock(p);
         }
 
         void Lock(int p)
@@ -356,7 +341,8 @@ namespace MiniParty
             var pk = pickers[p];
             if (pk.Locked) return;
             pk.Locked = true;
-            Emit(ActAnswer, p, round * 1000 + pk.Current, phaseTime);
+            pk.Hint.text = "";
+            Emit(ActAnswer, p, round * 1000 + Mathf.Max(0, pk.Current), phaseTime); // nothing typed = 0
         }
 
         IEnumerator Reveal(int winner)
@@ -371,6 +357,7 @@ namespace MiniParty
             {
                 var pk = pickers[p];
                 pk.Value.text = answers[p].ToString();
+                StartCoroutine(Tween.Pop(pk.Value.transform, 1.4f, 0.25f));
                 int diff = answers[p] - correct;
                 pk.Diff.text = diff == 0 ? "정답!" : diff > 0 ? $"+{diff}" : diff.ToString();
                 pk.Diff.color = diff == 0 ? Palette.Green : Palette.Red;

@@ -12,8 +12,7 @@ namespace MiniParty
     {
         public override string Title => "스페이스바 줄다리기";
         public override string Rules => "버튼을 미친 듯이 연타해서 줄을 내 쪽으로 끌어오세요!\n깃발이 내 쪽 결승선을 넘으면 승리.\n15초가 지나면 깃발이 더 가까운 쪽이 승리!";
-        public override string ControlsText => "P1   Space 연타\nP2   Enter 연타";
-        public override string OnlineControlsText => "Space (또는 Enter) 연타!";
+        public override string ControlsText => "Space (또는 Enter) 연타!";
 
         const float Goal = 300f;
         const float Step = 7f;
@@ -70,8 +69,8 @@ namespace MiniParty
                 countTexts[p].rectTransform.Place(new Vector2(0, -10), new Vector2(400, 110));
 
                 var cap = UIKit.Img("Key", infoPanels[p], Palette.PanelLight, UIKit.Rounded).rectTransform;
-                cap.Place(new Vector2(0, -90), new Vector2(p == 0 ? 300 : 200, 56));
-                UIKit.Label("Label", cap, p == 0 || Online ? "SPACE 연타!" : "ENTER 연타!", 26, Color.white).rectTransform.Stretch();
+                cap.Place(new Vector2(0, -90), new Vector2(300, 56));
+                UIKit.Label("Label", cap, "SPACE 연타!", 26, Color.white).rectTransform.Stretch();
                 keyCaps[p] = cap;
             }
             Apply();

@@ -35,8 +35,7 @@ namespace MiniParty
 
         public abstract string Title { get; }
         public abstract string Rules { get; }
-        public virtual string ControlsText => "P1   W A S D 이동 · Space 선택\nP2   방향키 이동 · Enter 선택\n마우스 클릭도 가능";
-        public virtual string OnlineControlsText => "W A S D / 방향키 이동 · Space 선택\n마우스 클릭도 가능";
+        public virtual string ControlsText => "W A S D / 방향키 이동 · Space 선택\n마우스 클릭도 가능";
 
         protected PlayerData[] Players;
         protected RectTransform Root;
@@ -108,20 +107,19 @@ namespace MiniParty
             Emit(KindWinner, -1, player);
         }
 
-        // ---------- input for players controlled on this machine ----------
-        // Offline both players share one keyboard (P1 WASD/Space/LMB, P2 arrows/Enter/RMB).
-        // Online the local player may use either set.
+        // ---------- input for the player controlled on this machine ----------
+        // One PC = one human player, so every key set works for them: WASD or arrows, Space or Enter, left click.
 
-        protected bool InConfirm(int p) => Online ? Controls.Confirm(0) || Controls.Confirm(1) : Controls.Confirm(p);
-        protected bool InClick(int p) => Online ? Controls.Click(0) : Controls.Click(p);
-        protected bool InLeft(int p) => Online ? Controls.Left(0) || Controls.Left(1) : Controls.Left(p);
-        protected bool InRight(int p) => Online ? Controls.Right(0) || Controls.Right(1) : Controls.Right(p);
-        protected bool InUp(int p) => Online ? Controls.Up(0) || Controls.Up(1) : Controls.Up(p);
-        protected bool InDown(int p) => Online ? Controls.Down(0) || Controls.Down(1) : Controls.Down(p);
-        protected bool InUpHeld(int p) => Online ? Controls.UpHeld(0) || Controls.UpHeld(1) : Controls.UpHeld(p);
-        protected bool InDownHeld(int p) => Online ? Controls.DownHeld(0) || Controls.DownHeld(1) : Controls.DownHeld(p);
-        protected bool InLeftHeld(int p) => Online ? Controls.LeftHeld(0) || Controls.LeftHeld(1) : Controls.LeftHeld(p);
-        protected bool InRightHeld(int p) => Online ? Controls.RightHeld(0) || Controls.RightHeld(1) : Controls.RightHeld(p);
+        protected bool InConfirm(int p) => Controls.AnyConfirm;
+        protected bool InClick(int p) => Controls.Click(0);
+        protected bool InLeft(int p) => Controls.Left(0) || Controls.Left(1);
+        protected bool InRight(int p) => Controls.Right(0) || Controls.Right(1);
+        protected bool InUp(int p) => Controls.Up(0) || Controls.Up(1);
+        protected bool InDown(int p) => Controls.Down(0) || Controls.Down(1);
+        protected bool InUpHeld(int p) => Controls.UpHeld(0) || Controls.UpHeld(1);
+        protected bool InDownHeld(int p) => Controls.DownHeld(0) || Controls.DownHeld(1);
+        protected bool InLeftHeld(int p) => Controls.LeftHeld(0) || Controls.LeftHeld(1);
+        protected bool InRightHeld(int p) => Controls.RightHeld(0) || Controls.RightHeld(1);
 
         /// <summary>Mouse position in the local space of a (pivot-centered) RectTransform on the overlay canvas.</summary>
         protected static Vector2 MouseIn(RectTransform rt)

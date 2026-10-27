@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
 
 namespace MiniParty
@@ -18,8 +17,7 @@ namespace MiniParty
     {
         public override string Title => "타자 대결";
         public override string Rules => "같은 단어 10개를 동시에 입력하는 타자 레이스! (영어도 섞여 나와요)\n두 사람에게 똑같은 단어가 같은 순서로 나옵니다.\n먼저 다 치는 사람 승리 · 틀리면 지우고 다시";
-        public override string ControlsText => "단어 입력 후 Enter 또는 Space (한/영 키로 전환)\n한 PC에서 둘 다 사람이면 P1 → P2 순서로 진행";
-        public override string OnlineControlsText => "단어 입력 후 Enter 또는 Space (한/영 키로 전환)";
+        public override string ControlsText => "단어 입력 후 Enter 또는 Space\n한/영 전환은 자동 (한글 단어면 한글, 영어 단어면 영어로 입력돼요)";
 
         const int WordCount = 10;
         const float TimeLimit = 60f;
@@ -45,7 +43,8 @@ namespace MiniParty
             public RectTransform Panel;
             public Text Word, Next, Input, Progress, Time;
             public Image Box;
-            public readonly StringBuilder Typed = new StringBuilder();
+            public readonly StringBuilder Typed = new StringBuilder(); // CPU / remote text
+            public readonly List<char> Keys = new List<char>();       // human keys (jamo or letters)
             public int Index;
             public float Elapsed;
             public bool Active, Done;
@@ -65,9 +64,7 @@ namespace MiniParty
 
         // keyboard capture
         int typist = -1;
-        string composition = "";
         bool hooked;
-        int submitFrames;
 
         bool TurnMode => IsHumanHere(0) && IsHumanHere(1);
 
@@ -115,7 +112,7 @@ namespace MiniParty
                 l.Input.rectTransform.Stretch();
                 l.Input.supportRichText = true;
 
-                string who = IsCpuHere(p) ? "CPU" : IsLocal(p) ? (Online ? "내 입력칸" : "키보드") : "상대";
+                string who = IsCpuHere(p) ? "CPU" : IsHumanHere(p) ? "내 입력칸" : "상대";
                 UIKit.Label("Who", l.Panel, who, 26, Palette.Muted, style: FontStyle.Normal).rectTransform.Place(new Vector2(0, -225), new Vector2(400, 40));
                 ShowWord(l);
                 RefreshInput(l);
@@ -133,45 +130,52 @@ namespace MiniParty
         void RefreshInput(Lane l)
         {
             bool mine = typist >= 0 && lanes[typist] == l;
-            string comp = mine && composition.Length > 0 ? $"<color=#FFC83D>{composition}</color>" : "";
             string caret = l.Active && !l.Done ? "<color=#9AA3C7>|</color>" : "";
-            l.Input.text = l.Typed + comp + caret;
+            if (mine)
+            {
+                Hangul.Compose(l.Keys, out var done, out var composing);
+                string comp = composing.Length > 0 ? $"<color=#FFC83D>{composing}</color>" : "";
+                l.Input.text = done + comp + caret;
+            }
+            else l.Input.text = l.Typed + caret;
         }
 
-        // ---------- keyboard capture (Input System + IME, so Korean works) ----------
+        string HumanText(Lane l)
+        {
+            Hangul.Compose(l.Keys, out var done, out var composing);
+            return done + composing;
+        }
+
+        // ---------- keyboard capture ----------
+        // The Windows IME is switched off and Korean is composed in-game (see Hangul), picked automatically
+        // from the current word, so nobody has to press 한/영.
 
         void Hook(bool on)
         {
             var kb = Keyboard.current;
             if (kb == null || on == hooked) return;
             hooked = on;
-            if (on)
-            {
-                kb.onTextInput += OnChar;
-                kb.onIMECompositionChange += OnComposition;
-            }
-            else
-            {
-                kb.onTextInput -= OnChar;
-                kb.onIMECompositionChange -= OnComposition;
-            }
-            kb.SetIMEEnabled(on);
+            if (on) kb.onTextInput += OnChar;
+            else kb.onTextInput -= OnChar;
+            kb.SetIMEEnabled(false);
         }
 
         void OnChar(char c)
         {
-            if (typist < 0 || char.IsControl(c) || c == ' ') return;
+            if (typist < 0 || char.IsControl(c) || char.IsWhiteSpace(c)) return;
             var l = lanes[typist];
-            if (!l.Active || l.Done) return;
-            l.Typed.Append(c);
+            if (!l.Active || l.Done || l.Index >= WordCount) return;
+            bool korean = Hangul.IsKorean(words[l.Index]);
+            bool letter = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+            if (letter)
+            {
+                var kb = Keyboard.current;
+                bool shift = kb != null && kb.shiftKey.isPressed;
+                c = korean ? Hangul.ToJamo(c, shift) : char.ToLowerInvariant(c);
+            }
+            if (l.Keys.Count >= 30) return;
+            l.Keys.Add(c);
             RefreshInput(l);
-        }
-
-        void OnComposition(IMECompositionString s)
-        {
-            if (typist < 0) return;
-            composition = s.ToString();
-            RefreshInput(lanes[typist]);
         }
 
         void OnDestroy() => Hook(false);
@@ -209,7 +213,7 @@ namespace MiniParty
             if (IsHumanHere(p))
             {
                 typist = p;
-                composition = "";
+                l.Keys.Clear();
                 Hook(true);
             }
             RefreshInput(l);
@@ -238,9 +242,9 @@ namespace MiniParty
                 bool submit = p == typist ? HumanSubmit(l) : IsCpuHere(p) && CpuStep(l);
                 if (!submit) continue;
 
-                string entry = (l.Typed.ToString() + (p == typist ? composition : "")).Trim();
+                string entry = (p == typist ? HumanText(l) : l.Typed.ToString()).Trim();
                 l.Typed.Clear();
-                if (p == typist) composition = "";
+                l.Keys.Clear();
                 if (entry == words[l.Index])
                 {
                     l.Index++;
@@ -255,22 +259,13 @@ namespace MiniParty
         bool HumanSubmit(Lane l)
         {
             var kb = Keyboard.current;
-            if (kb != null)
+            if (kb == null) return false;
+            if (kb.backspaceKey.wasPressedThisFrame && l.Keys.Count > 0)
             {
-                if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame)
-                    submitFrames = 3; // give the IME a frame or two to commit the last syllable
-                if (kb.backspaceKey.wasPressedThisFrame && composition.Length == 0 && l.Typed.Length > 0)
-                {
-                    l.Typed.Length--;
-                    RefreshInput(l);
-                }
+                l.Keys.RemoveAt(l.Keys.Count - 1);
+                RefreshInput(l);
             }
-            if (submitFrames > 0 && (composition.Length == 0 || --submitFrames == 0))
-            {
-                submitFrames = 0;
-                return true;
-            }
-            return false;
+            return kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame;
         }
 
         bool CpuStep(Lane l)

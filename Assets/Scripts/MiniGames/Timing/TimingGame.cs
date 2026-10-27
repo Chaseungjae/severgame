@@ -13,8 +13,7 @@ namespace MiniParty
     {
         public override string Title => "타이밍 서바이벌";
         public override string Rules => "움직이는 막대가 초록 구역 안에 있을 때 누르세요!\n성공할 때마다 구역은 좁아지고 속도는 빨라집니다.\n목숨 3개 — 더 오래 버틴 사람이 승리!";
-        public override string ControlsText => "P1   Space\nP2   Enter";
-        public override string OnlineControlsText => "Space 또는 마우스 클릭";
+        public override string ControlsText => "Space 또는 마우스 클릭";
 
         const int Lives = 3;
         const float BarW = 600f, BarH = 70f;
@@ -73,7 +72,7 @@ namespace MiniParty
                     heart.rectTransform.Place(new Vector2((h - 1) * 60, -150), new Vector2(60, 60));
                     lane.Hearts[h] = heart;
                 }
-                UIKit.Label("Hint", lane.Panel, Online ? "Space / 클릭" : p == 0 ? "Space" : "Enter", 26, Palette.Muted, style: FontStyle.Normal)
+                UIKit.Label("Hint", lane.Panel, "Space / 클릭", 26, Palette.Muted, style: FontStyle.Normal)
                     .rectTransform.Place(new Vector2(0, -220), new Vector2(300, 40));
                 lane.X = -BarW / 2f;
                 ShowLevel(lane);

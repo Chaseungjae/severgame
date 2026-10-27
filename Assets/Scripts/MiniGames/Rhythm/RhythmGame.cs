@@ -15,8 +15,7 @@ namespace MiniParty
     {
         public override string Title => "리듬 대결";
         public override string Rules => "떨어지는 노트가 판정선에 닿을 때 그 줄의 키를 누르세요! (4키 리듬게임)\nPERFECT 300 · GREAT 200 · GOOD 100 · MISS 0 — 같은 곡, 같은 채보\n점수가 더 높은 사람 승리 (동점이면 최대 콤보)";
-        public override string ControlsText => "P1   D F K L\nP2   ← ↓ ↑ →";
-        public override string OnlineControlsText => "D F K L (또는 방향키 ← ↓ ↑ →)";
+        public override string ControlsText => "D F K L (또는 방향키 ← ↓ ↑ →)";
 
         const float LaneW = 96f, HighwayH = 640f, JudgeY = -250f, ScrollSpeed = 820f;
         const float Perfect = 0.045f, Great = 0.09f, Good = 0.14f;
@@ -99,7 +98,7 @@ namespace MiniParty
                     l.Flash[k].rectTransform.Place(new Vector2(x, JudgeY + 90), new Vector2(LaneW - 4, 180));
                     var keyBox = UIKit.Img("Key", l.Highway, Palette.PanelLight, UIKit.Rounded);
                     keyBox.rectTransform.Place(new Vector2(x, JudgeY - 50), new Vector2(LaneW - 12, 56));
-                    string label = Online ? KeyLabels[0][k] : KeyLabels[p][k];
+                    string label = KeyLabels[0][k];
                     UIKit.Label("K", keyBox.transform, IsCpuHere(p) ? "" : label, 30, Color.white).rectTransform.Stretch();
                 }
                 UIKit.Img("JudgeLine", l.Highway, Color.white.WithAlpha(0.85f)).rectTransform.Place(new Vector2(0, JudgeY), new Vector2(LaneW * 4, 6));
@@ -159,7 +158,6 @@ namespace MiniParty
 
         bool LaneDown(int p, int k)
         {
-            if (!Online) return Controls.Pressed(LocalKeys[p][k]);
             return Controls.Pressed(OnlineKeys[k]) || Controls.Pressed(LocalKeys[1][k]);
         }
 

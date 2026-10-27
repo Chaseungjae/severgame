@@ -12,8 +12,7 @@ namespace MiniParty
     {
         public override string Title => "10초 맞추기";
         public override string Rules => "스톱워치가 흘러갑니다. 5초가 지나면 숫자가 사라져요!\n속으로 세다가 정확히 10초라고 생각될 때 누르세요.\n10.00초에 더 가까운 사람이 라운드 승리 · 3판 2선승";
-        public override string ControlsText => "P1   Space\nP2   Enter";
-        public override string OnlineControlsText => "Space 또는 마우스 클릭";
+        public override string ControlsText => "Space 또는 마우스 클릭";
 
         const int WinsNeeded = 2;
         const float Target = 10f, HideAfter = 5f, GiveUp = 15f;
@@ -62,7 +61,7 @@ namespace MiniParty
                     pip.rectTransform.Place(new Vector2((w - 0.5f) * 60, -230), new Vector2(40, 40));
                     l.Pips[w] = pip;
                 }
-                string key = Online ? "Space / 클릭" : p == 0 ? "Space" : "Enter";
+                string key = "Space / 클릭";
                 UIKit.Label("Key", l.Panel, $"{key}로 멈추기", 26, Palette.Muted, style: FontStyle.Normal)
                     .rectTransform.Place(new Vector2(0, -295), new Vector2(400, 40));
             }

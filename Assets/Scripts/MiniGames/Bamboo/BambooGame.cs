@@ -15,8 +15,7 @@ namespace MiniParty
     {
         public override string Title => "죽림고수";
         public override string Rules => "사방에서 내 쪽으로 날아오는 창을 방향키로 움직여 피하세요!\n맞으면 목숨 -1 (3개) · 맞은 직후 잠깐 무적\n점점 빨라지고 많아짐 · 더 오래 버틴 사람 승리";
-        public override string ControlsText => "P1   W A S D 이동\nP2   방향키 이동";
-        public override string OnlineControlsText => "방향키 또는 W A S D 이동";
+        public override string ControlsText => "방향키 또는 W A S D 이동";
 
         const float FieldW = 640f, FieldH = 600f;
         const float MoveSpeed = 340f;

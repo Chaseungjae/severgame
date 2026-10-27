@@ -15,7 +15,6 @@ namespace MiniParty
         public override string Title => "원을 그려봐요";
         public override string Rules => "가운데 점을 둘러싸도록 마우스로 최대한 완벽한 원을 그리세요!\n한 사람당 2번 — 더 높은 점수로 승부\n(한 PC에서는 P1 → P2 순서로 번갈아 그립니다)";
         public override string ControlsText => "마우스 왼쪽 버튼을 누른 채로 한 바퀴 그리기";
-        public override string OnlineControlsText => ControlsText;
 
         const int Tries = 2;
         const float TryTime = 7f;

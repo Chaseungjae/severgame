@@ -14,8 +14,7 @@ namespace MiniParty
     {
         public override string Title => "표창 막기";
         public override string Rules => "사방에서 날아오는 표창을 막아내세요!\n표창이 원 안에 들어왔을 때 그 방향키를 누르면 쳐냄 · 맞으면 목숨 -1 (3개)\n헛손질하면 잠깐 굳음 · 점점 빨라짐 · 더 오래 버틴 사람 승리";
-        public override string ControlsText => "P1   W A S D\nP2   ↑ ← ↓ →";
-        public override string OnlineControlsText => "W A S D 또는 방향키";
+        public override string ControlsText => "W A S D 또는 방향키";
 
         const int Count = 250;
         const float Arena = 300f;       // spawn distance from the center

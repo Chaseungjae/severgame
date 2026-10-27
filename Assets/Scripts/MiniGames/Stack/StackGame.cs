@@ -14,8 +14,7 @@ namespace MiniParty
     {
         public override string Title => "블럭 쌓기";
         public override string Rules => "좌우에서 오는 블럭을 타이밍 맞게 눌러 쌓으세요!\n삐져나온 부분은 잘려나가서 블럭이 점점 좁아집니다.\n완전히 빗나가면 끝 — 더 높이 쌓은 사람이 승리!";
-        public override string ControlsText => "P1   Space\nP2   Enter";
-        public override string OnlineControlsText => "Space 또는 마우스 클릭";
+        public override string ControlsText => "Space 또는 마우스 클릭";
 
         const float BaseWidth = 300f, BlockH = 34f, Travel = 330f;
         const float PerfectTolerance = 5f;

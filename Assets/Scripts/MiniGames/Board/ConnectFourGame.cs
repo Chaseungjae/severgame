@@ -14,7 +14,6 @@ namespace MiniParty
         public override string Title => "사목";
         public override string Rules => "원하는 줄을 클릭하면 돌이 맨 아래로 떨어집니다.\n가로·세로·대각선으로 4개를 먼저 이으면 승리! (선공은 무작위)\n한 수 8초 (시간 초과 시 자동 착수)";
         public override string ControlsText => "마우스로 줄(세로 칸) 클릭 (번갈아 가며)";
-        public override string OnlineControlsText => ControlsText;
 
         protected override int BoardSize => 7;
         protected override int BoardRows => 6;

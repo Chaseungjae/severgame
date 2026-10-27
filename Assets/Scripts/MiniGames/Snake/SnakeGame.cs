@@ -15,8 +15,7 @@ namespace MiniParty
     {
         public override string Title => "스네이크 대결";
         public override string Rules => "한 경기장에서 두 뱀이 대결! 사과를 먹으면 길어집니다.\n벽·자기 몸·상대 뱀에 부딪히면 패배 (머리끼리 부딪히면 더 긴 쪽 승리)\n60초가 지나면 더 긴 뱀이 승리";
-        public override string ControlsText => "P1   W A S D\nP2   ↑ ← ↓ →";
-        public override string OnlineControlsText => "W A S D 또는 방향키";
+        public override string ControlsText => "W A S D 또는 방향키";
 
         const int W = 28, H = 17;
         const float Cell = 32f;
@@ -64,7 +63,7 @@ namespace MiniParty
                 UIKit.Label("L", panels[p], "길이", 28, Palette.Muted).rectTransform.Place(new Vector2(0, 40), new Vector2(200, 40));
                 lengthTexts[p] = UIKit.Label("Len", panels[p], "3", 80, Color.white);
                 lengthTexts[p].rectTransform.Place(new Vector2(0, -30), new Vector2(200, 100));
-                string keys = Online ? "WASD / 방향키" : p == 0 ? "W A S D" : "방향키";
+                string keys = "WASD / 방향키";
                 UIKit.Label("Keys", panels[p], keys, 24, Palette.Muted, style: FontStyle.Normal).rectTransform.Place(new Vector2(0, -105), new Vector2(300, 36));
             }
 

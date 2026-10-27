@@ -14,7 +14,6 @@ namespace MiniParty
         public override string Title => "오델로";
         public override string Rules => "상대 돌을 내 돌 사이에 끼우면 뒤집혀 내 돌이 됩니다! (흑백은 무작위, 흑 선공)\n둘 곳이 없으면 자동 패스 · 둘 다 못 두면 종료\n돌이 더 많은 사람 승리 · 한 수 12초 (시간 초과 시 자동 착수)";
         public override string ControlsText => "마우스 클릭으로 돌 두기 (점 표시된 곳만 가능)";
-        public override string OnlineControlsText => ControlsText;
 
         protected override int BoardSize => 8;
         protected override float CellSize => 76f;

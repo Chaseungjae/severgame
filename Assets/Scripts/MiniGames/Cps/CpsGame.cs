@@ -9,8 +9,7 @@ namespace MiniParty
     {
         public override string Title => "CPS 클릭 대결";
         public override string Rules => "5초 동안 최대한 많이 클릭하세요!\nCPS(초당 클릭 수)가 더 높은 사람이 승리!";
-        public override string ControlsText => "P1   마우스 왼쪽 클릭\nP2   마우스 오른쪽 클릭  (한 PC 테스트용)";
-        public override string OnlineControlsText => "마우스 왼쪽 클릭 연타!";
+        public override string ControlsText => "마우스 왼쪽 클릭 연타!";
 
         const float Duration = 5f;
         const int ActClick = 1, ActFinal = 2;
@@ -56,7 +55,7 @@ namespace MiniParty
                 UIKit.Label("Label", target, "CLICK!", 56, Color.white).rectTransform.Stretch();
                 targets[p] = target;
 
-                UIKit.Label("Hint", panel, Online ? (IsLocal(p) ? "왼쪽 클릭" : "상대") : p == 0 ? "왼쪽 클릭" : "오른쪽 클릭", 26, Palette.Muted, style: FontStyle.Normal)
+                UIKit.Label("Hint", panel, IsHumanHere(p) ? "왼쪽 클릭" : IsCpuHere(p) ? "CPU" : "상대", 26, Palette.Muted, style: FontStyle.Normal)
                     .rectTransform.Place(new Vector2(0, -340), new Vector2(400, 40));
             }
         }

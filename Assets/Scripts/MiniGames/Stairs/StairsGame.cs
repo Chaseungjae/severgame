@@ -14,8 +14,7 @@ namespace MiniParty
     {
         public override string Title => "100층 도전";
         public override string Rules => "계단을 올라 100층에 먼저 도착하세요!\n오르기: 보고 있는 방향으로 한 칸 · 방향전환: 방향을 바꾸며 한 칸\n계단 방향과 다르게 누르면 헛디딤 (잠깐 멈춤)";
-        public override string ControlsText => "P1   D 오르기 · A 방향전환\nP2   → 오르기 · ← 방향전환";
-        public override string OnlineControlsText => "D 또는 → 오르기 · A 또는 ← 방향전환";
+        public override string ControlsText => "D 또는 → 오르기 · A 또는 ← 방향전환";
 
         const int Floors = 100;
         const float StepW = 84f, StepH = 56f;
@@ -130,8 +129,8 @@ namespace MiniParty
                 }
                 else
                 {
-                    bool climb = Online ? Controls.Right(0) || Controls.Right(1) : Controls.Right(p);
-                    bool turn = Online ? Controls.Left(0) || Controls.Left(1) : Controls.Left(p);
+                    bool climb = InRight(p);
+                    bool turn = InLeft(p);
                     if (climb) Move(p, false);
                     else if (turn) Move(p, true);
                 }

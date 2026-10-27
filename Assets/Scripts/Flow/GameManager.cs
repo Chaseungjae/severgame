@@ -16,6 +16,8 @@ namespace MiniParty
         [Header("벌칙 데미지 (라운드당)")]
         [SerializeField] int minDamage = 25;
         [SerializeField] int maxDamage = 35;
+        [Tooltip("테스트용: 켜면 모든 패배 데미지가 1")]
+        [SerializeField] bool testDamageOne = true;
 
         [Header("테스트용: 로비에서 CPU로 시작")]
         [SerializeField] bool p1Cpu;
@@ -101,7 +103,7 @@ namespace MiniParty
         {
             bool Lost() => net != null && net.Disconnected;
             bool authority = net == null || net.IsHost;
-            // CPU vs CPU = watch/test mode: every minigame once before any repeats, and only 1 damage per loss
+            // CPU vs CPU = watch/test mode (log lines); every minigame is played once before any repeats
             bool cpuTest = net == null && players[0].IsCpu && players[1].IsCpu;
             var deck = new System.Collections.Generic.List<int>();
 
@@ -113,13 +115,9 @@ namespace MiniParty
                 int gameIndex = 0, seed = 0;
                 if (authority)
                 {
-                    if (cpuTest)
-                    {
-                        if (deck.Count == 0) deck = MiniGameRegistry.ShuffledDeck();
-                        gameIndex = deck[0];
-                        deck.RemoveAt(0);
-                    }
-                    else gameIndex = MiniGameRegistry.PickIndex();
+                    if (deck.Count == 0) deck = MiniGameRegistry.ShuffledDeck();
+                    gameIndex = deck[0];
+                    deck.RemoveAt(0);
                     seed = Random.Range(1, int.MaxValue);
                     net?.Send(new NetMsg { Type = MsgType.StartRound, A = round, B = gameIndex, C = seed });
                 }
@@ -161,7 +159,7 @@ namespace MiniParty
                 int winner = game.WinnerIndex, damage;
                 if (authority)
                 {
-                    damage = cpuTest ? 1 : Random.Range(minDamage, maxDamage + 1);
+                    damage = cpuTest || testDamageOne ? 1 : Random.Range(minDamage, maxDamage + 1);
                     net?.Send(new NetMsg { Type = MsgType.RoundResult, A = winner, B = damage });
                 }
                 else

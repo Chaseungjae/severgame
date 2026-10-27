@@ -17,8 +17,7 @@ namespace MiniParty
     {
         public override string Title => "F1 반응 속도";
         public override string Rules => "빨간 불 5개가 하나씩 켜진 뒤, 모두 꺼지는 순간 누르세요!\n불이 꺼지기 전에 누르면 부정출발 → 상대 득점.\n3판 2선승!";
-        public override string ControlsText => "P1   Space 또는 마우스 왼쪽 클릭\nP2   Enter 또는 마우스 오른쪽 클릭";
-        public override string OnlineControlsText => "Space 또는 마우스 왼쪽 클릭";
+        public override string ControlsText => "Space 또는 마우스 왼쪽 클릭";
 
         const int WinsNeeded = 2;
         const float ResponseWindow = 1.2f;

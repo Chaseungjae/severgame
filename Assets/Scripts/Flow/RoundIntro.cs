@@ -49,7 +49,7 @@ namespace MiniParty
 
             var ctrl = UIKit.Img("ControlsBox", d, Palette.Panel, UIKit.Rounded).rectTransform;
             ctrl.Place(new Vector2(0, -225), new Vector2(900, 150));
-            UIKit.Label("Controls", ctrl, online ? game.OnlineControlsText : game.ControlsText, 28, Palette.Muted, style: FontStyle.Normal).rectTransform.Stretch();
+            UIKit.Label("Controls", ctrl, game.ControlsText, 28, Palette.Muted, style: FontStyle.Normal).rectTransform.Stretch();
 
             skipText = UIKit.Label("Skip", d, "Space / Enter 로 바로 시작", 24, Palette.Muted, style: FontStyle.Normal);
             skipText.rectTransform.Place(new Vector2(0, -380), new Vector2(600, 36));
