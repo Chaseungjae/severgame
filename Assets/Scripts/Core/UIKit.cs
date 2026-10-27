@@ -43,6 +43,37 @@ namespace MiniParty
         public static Sprite Circle => circle != null ? circle : circle = MakeRounded(128, 64f, false);
         public static Sprite Rounded => rounded != null ? rounded : rounded = MakeRounded(64, 20f, true);
 
+        static Sprite ring, glow, vignette;
+
+        /// <summary>Thin circle outline (impact rings).</summary>
+        public static Sprite Ring => ring != null ? ring : ring = MakeRadial(128, "Ring", d => Mathf.Clamp01(1f - Mathf.Abs(d - 0.9f) / 0.08f));
+        /// <summary>Soft round glow that fades to the edge.</summary>
+        public static Sprite Glow => glow != null ? glow : glow = MakeRadial(128, "Glow", d => Mathf.Pow(Mathf.Clamp01(1f - d), 2f));
+        /// <summary>Transparent center, opaque edges (screen vignette).</summary>
+        public static Sprite Vignette => vignette != null ? vignette : vignette = MakeRadial(128, "Vignette", d => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((d - 0.55f) / 0.6f)));
+
+        /// <summary>Alpha as a function of the normalized distance from the center (0 center, 1 edge).</summary>
+        static Sprite MakeRadial(int size, string name, System.Func<float, float> alpha)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            {
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear,
+                name = name
+            };
+            var px = new Color32[size * size];
+            float half = size / 2f;
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(half, half)) / half;
+                px[y * size + x] = new Color32(255, 255, 255, (byte)(Mathf.Clamp01(alpha(d)) * 255));
+            }
+            tex.SetPixels32(px);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100);
+        }
+
         static Sprite MakeRounded(int size, float radius, bool sliced)
         {
             var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)

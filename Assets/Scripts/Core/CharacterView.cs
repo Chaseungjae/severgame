@@ -193,11 +193,13 @@ namespace MiniParty
             return Tween.Run(duration, t => BaseScale = Vector3.LerpUnclamped(from, target, t), ease ?? Ease.OutQuad);
         }
 
-        /// <summary>Small impact reaction: white flash + squash.</summary>
+        /// <summary>Small impact reaction: white flash + squash, with a spark ring on the body.</summary>
         public void Hit()
         {
             if (hitRoutine != null) StopCoroutine(hitRoutine);
             hitRoutine = StartCoroutine(HitRoutine());
+            if (transform.parent is RectTransform parent)
+                Juice.Hit(parent, Rt.anchoredPosition + Vector2.up * Size * 0.5f * BaseScale.y);
         }
 
         /// <summary>Quick squash-and-recover without the flash (e.g. pulling a rope).</summary>

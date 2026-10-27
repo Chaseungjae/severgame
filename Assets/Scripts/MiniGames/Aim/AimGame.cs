@@ -250,6 +250,7 @@ namespace MiniParty
                 f.ReactSum += act.F;
                 f.Targets[i].gameObject.SetActive(false);
                 StartCoroutine(HitBurst(f, TargetPos(i), Players[act.Player].Color));
+                Juice.Burst(f.Rt, TargetPos(i), Juice.Style.Debris, 8, Palette.Hex("#FF4655"), 0.7f);
                 RefreshScore(f);
             }
             else if (act.Kind == ActFinal)

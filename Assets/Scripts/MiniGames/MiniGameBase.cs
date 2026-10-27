@@ -161,6 +161,12 @@ namespace MiniParty
             stamp.rectTransform.localRotation = Quaternion.Euler(0, 0, won ? 8 : -6);
             UIKit.Shadow(stamp, 6f, 0.6f);
             StartCoroutine(Tween.Pop(stamp.transform, 2.2f, 0.35f));
+            if (won)
+            {
+                Juice.Sparkle(panel, new Vector2(0, y), Palette.Gold, 1.3f);
+                Juice.Shake(0.25f);
+            }
+            else Juice.Burst(panel, new Vector2(0, y), Juice.Style.Dust, 10, Palette.Muted);
         }
     }
 
@@ -184,11 +190,17 @@ namespace MiniParty
 
         public Coroutine Start(IEnumerator routine) => runner.StartCoroutine(routine);
 
+        public Vector2 LoserCenter => Loser.Rt.anchoredPosition + Vector2.up * Loser.Size * 0.5f * Loser.BaseScale.y;
+
+        /// <summary>
+        /// Screen shake for a punishment beat (intensity ≈ old pixel amount). Big ones (18+) also play a full impact
+        /// on the loser: freeze frame, ring, sparks, speed lines, dust.
+        /// </summary>
         public IEnumerator Shake(float intensity, float duration)
         {
-            var home = Stage.anchoredPosition;
-            yield return Tween.Run(duration, t => Stage.anchoredPosition = home + UnityEngine.Random.insideUnitCircle * intensity * (1 - t));
-            Stage.anchoredPosition = home;
+            if (intensity >= 18f) Juice.Impact(Stage, LoserCenter, Mathf.InverseLerp(14f, 30f, intensity), ground: true);
+            else Juice.Shake(intensity / 40f);
+            yield return new WaitForSeconds(duration);
         }
     }
 
@@ -217,8 +229,11 @@ namespace MiniParty
 
                 ctx.Loser.SetFace(CharacterView.Face.Hurt);
                 ctx.Loser.BaseScale = new Vector3(1.5f, 0.3f, 1f);
-                ctx.Start(ctx.Shake(h == hits - 1 ? 28f : 16f, 0.3f));
-                if (h == hits - 1) break;
+                bool last = h == hits - 1;
+                var contact = new Vector2(feet.x, feet.y + flatH);
+                Juice.Impact(ctx.Stage, contact, last ? 1f : 0.55f, ground: true);
+                Juice.Burst(ctx.Stage, new Vector2(feet.x, feet.y + 10f), Juice.Style.Debris, last ? 14 : 6);
+                if (last) break;
 
                 // bounce up a bit for the next slam
                 yield return new WaitForSeconds(0.08f);

@@ -56,13 +56,17 @@ namespace MiniParty
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = 0.5f;
 
-            // draw order: minigame < blur < stage (characters) < hud < overlay (lobby / intro) < fader
-            gameLayer = UIKit.Rect("GameLayer", go.transform).Stretch();
-            blur = BlurBackdrop.Create(go.transform);
-            stage = UIKit.Rect("Stage", go.transform).Stretch();
-            hudLayer = UIKit.Rect("HudLayer", go.transform).Stretch();
-            overlay = UIKit.Rect("Overlay", go.transform).Stretch();
+            // draw order: minigame < blur < stage (characters) < hud < overlay (lobby / intro) < screen fx < fader
+            // everything except the screen fx and the fader sits in Shake, which screen shake moves around
+            var shake = UIKit.Rect("Shake", go.transform).Stretch();
+            gameLayer = UIKit.Rect("GameLayer", shake).Stretch();
+            blur = BlurBackdrop.Create(shake);
+            stage = UIKit.Rect("Stage", shake).Stretch();
+            hudLayer = UIKit.Rect("HudLayer", shake).Stretch();
+            overlay = UIKit.Rect("Overlay", shake).Stretch();
+            var screenFx = UIKit.Rect("ScreenFx", go.transform).Stretch();
             fader = ScreenFader.Create(go.transform);
+            Juice.Init(shake, screenFx);
         }
 
         IEnumerator MainLoop()

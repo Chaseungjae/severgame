@@ -65,6 +65,7 @@ namespace MiniParty
             winLabel.rectTransform.Place(new Vector2(0, 290), new Vector2(400, 130), new Vector2(0.5f, 0f));
             winLabel.rectTransform.localRotation = Quaternion.Euler(0, 0, 6);
             UIKit.Shadow(winLabel, 6f, 0.6f);
+            Juice.Sparkle(stage, wv.Rt.anchoredPosition + new Vector2(0, wv.Size + 110f), Palette.Gold, 1.2f);
             yield return Tween.Pop(winLabel.transform, 2.2f, 0.35f);
             yield return wv.Jump(70, 0.35f);
             yield return new WaitForSeconds(0.25f);
@@ -82,6 +83,8 @@ namespace MiniParty
             int from = loser.Hp;
             loser.Hp = Mathf.Max(0, loser.Hp - damage);
             runner.StartCoroutine(DamagePopup(Views[Loser], damage));
+            Juice.Vignette(Palette.Red.WithAlpha(0.55f), 0.7f);
+            Juice.Shake(0.35f);
             yield return hud.AnimateHp(Loser, from, loser.Hp);
             yield return new WaitForSeconds(0.8f);
 
@@ -145,6 +148,7 @@ namespace MiniParty
                 if (t >= nextParty)
                 {
                     Confetti.Burst(stage, wv.Rt.anchoredPosition + new Vector2(0, 260), 50);
+                    Juice.Sparkle(stage, wv.Rt.anchoredPosition + new Vector2(0, 200), Palette.Gold, 1.4f);
                     runner.StartCoroutine(wv.Jump(90, 0.4f));
                     nextParty = t + 1.6f;
                 }

@@ -180,6 +180,7 @@ namespace MiniParty
                     BuildLevel(p);
                     StartCoroutine(Tween.Pop(b.Score.transform, 1.4f, 0.15f));
                     StartCoroutine(Tween.Pop(b.Grid, 1.05f, 0.12f));
+                    Juice.Sparkle(b.Panel, new Vector2(0, -70), null, 0.6f);
                     break;
                 case ActWrong:
                     b.Mistakes++;

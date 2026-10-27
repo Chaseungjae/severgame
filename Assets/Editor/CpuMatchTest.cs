@@ -115,7 +115,7 @@ namespace MiniParty.EditorTools
 
             if (!configured)
             {
-                var lobbyGo = GameObject.Find("GameManager/GameCanvas/Overlay/Lobby");
+                var lobbyGo = GameObject.Find("GameManager/GameCanvas/Shake/Overlay/Lobby");
                 if (lobbyGo == null) return;
                 Application.runInBackground = true;
                 var lobby = lobbyGo.GetComponent<LobbyScreen>();
@@ -137,9 +137,9 @@ namespace MiniParty.EditorTools
                 return;
             }
 
-            var stage = GameObject.Find("GameManager/GameCanvas/Stage");
-            var gameLayer = GameObject.Find("GameManager/GameCanvas/GameLayer");
-            var overlay = GameObject.Find("GameManager/GameCanvas/Overlay");
+            var stage = GameObject.Find("GameManager/GameCanvas/Shake/Stage");
+            var gameLayer = GameObject.Find("GameManager/GameCanvas/Shake/GameLayer");
+            var overlay = GameObject.Find("GameManager/GameCanvas/Shake/Overlay");
             if (stage == null) return;
 
             bool pod = stage.transform.childCount > 0;

@@ -259,6 +259,9 @@ namespace MiniParty
                     l.ComboCount++;
                     l.MaxCombo = Mathf.Max(l.MaxCombo, l.ComboCount);
                     l.Flash[chart[i].Lane].color = GradeColor[grade].WithAlpha(0.5f);
+                    var hitPos = new Vector2(LaneX(chart[i].Lane), JudgeY);
+                    if (grade == 0) Juice.Burst(l.Highway, hitPos, Juice.Style.Sparks, 6, GradeColor[0], 0.45f);
+                    Juice.Ring(l.Highway, hitPos, GradeColor[grade].WithAlpha(0.8f), LaneW * 1.3f, 0.2f);
                 }
                 else l.ComboCount = 0;
 

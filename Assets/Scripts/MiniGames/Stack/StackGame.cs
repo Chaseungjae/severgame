@@ -172,7 +172,12 @@ namespace MiniParty
                 StartCoroutine(Tween.Pop(block.transform, 1.12f, 0.12f));
                 t.Height.text = $"{level}층";
                 t.Info.text = perfect ? "PERFECT!" : "";
-                if (perfect) StartCoroutine(Tween.Pop(t.Info.transform, 1.5f, 0.2f));
+                if (perfect)
+                {
+                    StartCoroutine(Tween.Pop(t.Info.transform, 1.5f, 0.2f));
+                    Juice.Ring(t.Content, new Vector2(left + act.F / 2f, LevelY(level - 1) + BlockH / 2f), Color.white, act.F * 1.4f, 0.3f);
+                }
+                Juice.Burst(t.Content, new Vector2(left + act.F / 2f, LevelY(level - 1)), Juice.Style.Dust, perfect ? 4 : 6, null, 0.6f);
 
                 judge.Score[p] = level;
                 judge.TieBreak[p] = -act.F; // wider final block wins a tie

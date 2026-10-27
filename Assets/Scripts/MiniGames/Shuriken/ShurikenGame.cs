@@ -219,6 +219,7 @@ namespace MiniParty
                     l.Info.color = Palette.Gold;
                     StartCoroutine(Tween.Pop(l.Info.transform, 1.4f, 0.12f));
                     StartCoroutine(Slash(l, dirOf[act.A], Players[p].Color));
+                    Juice.Burst(l.Field, DirVec[dirOf[act.A]] * 95f, Juice.Style.Sparks, 8, null, 0.6f);
                     l.View.Pulse(new Vector3(1.12f, 0.9f, 1f), 0.12f);
                     break;
                 case ActHit:

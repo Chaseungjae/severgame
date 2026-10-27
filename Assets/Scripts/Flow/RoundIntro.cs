@@ -101,6 +101,18 @@ namespace MiniParty
                 var label = UIKit.Label("Count", transform, s, s.Length > 1 ? 170 : 240, s.Length > 1 ? Palette.Gold : Color.white);
                 label.rectTransform.Place(Vector2.zero, new Vector2(900, 300));
                 UIKit.Shadow(label, 8f, 0.6f);
+                var self = (RectTransform)transform;
+                if (s.Length > 1)
+                {
+                    Juice.Ring(self, Vector2.zero, Palette.Gold, 700f, 0.4f);
+                    Juice.Burst(self, Vector2.zero, Juice.Style.Stars, 24, null, 1.4f);
+                    Juice.Shake(0.3f);
+                }
+                else
+                {
+                    Juice.Ring(self, Vector2.zero, Color.white.WithAlpha(0.7f), 420f, 0.3f);
+                    Juice.Shake(0.12f);
+                }
                 yield return Tween.Pop(label.transform, 1.8f, 0.3f);
                 yield return new WaitForSeconds(s.Length > 1 ? 0.15f : 0.3f);
                 if (s.Length > 1)
