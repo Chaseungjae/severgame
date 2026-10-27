@@ -32,7 +32,7 @@ namespace MiniParty.EditorTools
         [MenuItem("MiniParty/Test/CPU vs CPU - Newest Games")]
         static void NewestGames()
         {
-            var wanted = new[] { typeof(BallCountGame), typeof(TypingGame) };
+            var wanted = new[] { typeof(YachtGame), typeof(StairsGame), typeof(ColorGame) };
             var list = new List<int>();
             foreach (var t in wanted)
                 for (int i = 0; i < MiniGameRegistry.Games.Length; i++)

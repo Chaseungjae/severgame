@@ -169,7 +169,7 @@ namespace MiniParty
             }
             else if (act.Kind == ActMiss)
             {
-                t.Face = act.A == 1 ? 1 : -1;
+                // a misstep keeps the old facing; flipping here made the keys feel reversed after a wrong turn
                 t.StunUntil = Time.time + Stun;
                 Apply(t, false);
                 t.View.SetFace(CharacterView.Face.Hurt);

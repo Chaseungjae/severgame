@@ -295,6 +295,7 @@ namespace MiniParty
             ("스네이크 대결", typeof(SnakeGame)),
             ("순간 기억력", typeof(MemoryGame)),
             ("10초 맞추기", typeof(TenSecondsGame)),
+            ("야추 다이스", typeof(YachtGame)),
         };
 
         static int last = -1;
