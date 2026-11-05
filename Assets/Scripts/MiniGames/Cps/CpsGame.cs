@@ -10,6 +10,7 @@ namespace MiniParty
         public override string Title => "CPS 클릭 대결";
         public override string Rules => "5초 동안 최대한 많이 클릭하세요!\nCPS(초당 클릭 수)가 더 높은 사람이 승리!";
         public override string ControlsText => "마우스 왼쪽 클릭 연타!";
+        public override string[] KeyIcons => new[] { "mouse_left" };
 
         const float Duration = 5f;
         const int ActClick = 1, ActFinal = 2;

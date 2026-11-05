@@ -16,6 +16,7 @@ namespace MiniParty
         public override string Title => "순간 기억력";
         public override string Rules => "숫자가 하나씩 나타났다 사라집니다. 끝나면 거꾸로 입력하세요!\n예) 1 6 8 4 → 4 8 6 1 · 맞히면 한 자리씩 늘어남\n틀리면 목숨 -1 (2개) · 더 멀리 간 사람 승리";
         public override string ControlsText => "숫자키 1~9 또는 마우스 클릭";
+        public override string[] KeyIcons => new[] { "keyboard_1", "keyboard_2", "keyboard_3", "/", "mouse_left" };
 
         const int Lives = 2;
         const int StartLength = 3;

@@ -18,6 +18,7 @@ namespace MiniParty
         public override string Title => "타자 대결";
         public override string Rules => "같은 단어 10개를 동시에 입력하는 타자 레이스! (영어도 섞여 나와요)\n두 사람에게 똑같은 단어가 같은 순서로 나옵니다.\n먼저 다 치는 사람 승리 · 틀리면 지우고 다시";
         public override string ControlsText => "단어 입력 후 Enter 또는 Space\n한/영 전환은 자동 (한글 단어면 한글, 영어 단어면 영어로 입력돼요)";
+        public override string[] KeyIcons => new[] { "keyboard_enter", "/", "keyboard_space" };
 
         const int WordCount = 10;
         const float TimeLimit = 60f;
@@ -248,6 +249,7 @@ namespace MiniParty
                 if (entry == words[l.Index])
                 {
                     l.Index++;
+                    if (IsHumanHere(p)) Sfx.Tap();
                     Emit(ActProgress, p, l.Index);
                     if (l.Index >= WordCount) Finish(p);
                 }

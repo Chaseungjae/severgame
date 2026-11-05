@@ -13,6 +13,7 @@ namespace MiniParty
         public override string Title => "스페이스바 줄다리기";
         public override string Rules => "버튼을 미친 듯이 연타해서 줄을 내 쪽으로 끌어오세요!\n깃발이 내 쪽 결승선을 넘으면 승리.\n15초가 지나면 깃발이 더 가까운 쪽이 승리!";
         public override string ControlsText => "Space (또는 Enter) 연타!";
+        public override string[] KeyIcons => new[] { "keyboard_space" };
 
         const float Goal = 300f;
         const float Step = 7f;

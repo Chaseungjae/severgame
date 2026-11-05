@@ -14,6 +14,7 @@ namespace MiniParty
         public override string Title => "색깔 찾기";
         public override string Rules => "타일 중 색이 살짝 다른 하나를 찾아 누르세요!\n맞힐수록 칸은 많아지고 색 차이는 줄어듭니다. 틀리면 잠깐 멈춤\n30초 동안 더 많이 맞힌 사람 승리 (두 사람 같은 문제)";
         public override string ControlsText => "다른 색 칸을 마우스로 클릭";
+        public override string[] KeyIcons => new[] { "mouse_left" };
 
         const float Duration = 30f;
         const float GridPx = 560f;

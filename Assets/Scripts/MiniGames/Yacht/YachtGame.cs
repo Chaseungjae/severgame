@@ -17,6 +17,7 @@ namespace MiniParty
         public override string Title => "야추 다이스";
         public override string Rules => "주사위 5개를 최대 3번 굴려 가장 센 패를 만드세요!\n굴린 뒤 마음에 드는 주사위는 고정(HOLD)하고 나머지만 다시 굴릴 수 있어요.\n더 큰 패를 가진 사람 승리 · 운빨 100%";
         public override string ControlsText => "Space 굴리기 · 숫자키 1~5 또는 주사위 클릭으로 고정 · Enter 확정";
+        public override string[] KeyIcons => new[] { "keyboard_space", "keyboard_1", "keyboard_5", "mouse_left", "keyboard_enter" };
 
         const int DiceCount = 5, MaxRolls = 3;
         const float TimeLimit = 30f;
@@ -346,6 +347,7 @@ namespace MiniParty
             var l = lanes[p];
             l.Animating = true;
             l.Hand.text = "";
+            Sfx.Roll();
             float t = 0f, tick = 0f;
             while (t < RollAnim)
             {
@@ -429,6 +431,7 @@ namespace MiniParty
             var l = lanes[p];
             if (!Running || !IsLocal(p) || l.Done || l.Animating || l.RollsUsed == 0 || l.RollsUsed >= MaxRolls) return;
             l.Held[i] = !l.Held[i];
+            if (IsHumanHere(p)) Sfx.Toggle();
             ShowHolds(l);
             int mask = 0;
             for (int k = 0; k < DiceCount; k++) if (l.Held[k]) mask |= 1 << k;

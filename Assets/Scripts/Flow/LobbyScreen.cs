@@ -467,6 +467,7 @@ namespace MiniParty
                         if (Controls.AnyConfirm)
                         {
                             ready[0] = !ready[0];
+                            Sfx.Toggle();
                             RefreshStatus(0);
                             if (ready[0]) StartCoroutine(previews[0].Jump(60, 0.3f));
                         }

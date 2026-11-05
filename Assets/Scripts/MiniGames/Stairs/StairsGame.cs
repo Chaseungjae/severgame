@@ -15,6 +15,7 @@ namespace MiniParty
         public override string Title => "100층 도전";
         public override string Rules => "계단을 올라 100층에 먼저 도착하세요!\n오르기: 보고 있는 방향으로 한 칸 · 방향전환: 방향을 바꾸며 한 칸\n계단 방향과 다르게 누르면 헛디딤 (잠깐 멈춤)";
         public override string ControlsText => "D 또는 → 오르기 · A 또는 ← 방향전환";
+        public override string[] KeyIcons => new[] { "keyboard_d", "keyboard_arrow_right", "/", "keyboard_a", "keyboard_arrow_left" };
 
         const int Floors = 100;
         const float StepW = 84f, StepH = 56f;

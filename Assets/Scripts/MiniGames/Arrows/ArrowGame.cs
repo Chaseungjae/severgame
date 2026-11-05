@@ -13,6 +13,7 @@ namespace MiniParty
         public override string Title => "방향키 입력 대결";
         public override string Rules => "화면에 나온 방향키를 순서대로 입력하세요!\n틀리면 그 줄은 처음부터 다시 (잠깐 멈춤)\n7줄을 먼저 끝내는 사람이 승리 · 뒤로 갈수록 길어집니다";
         public override string ControlsText => "W A S D 또는 방향키";
+        public override string[] KeyIcons => new[] { "keyboard_w", "keyboard_a", "keyboard_s", "keyboard_d", "/", "keyboard_arrows_all" };
 
         static readonly int[] Lengths = { 4, 5, 5, 6, 7, 8, 9 };
         static readonly string[] Glyph = { "↑", "→", "↓", "←" };

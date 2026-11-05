@@ -48,11 +48,43 @@ namespace MiniParty
             UIKit.Label("Rules", d, game.Rules, 34, Color.white, style: FontStyle.Normal).rectTransform.Place(new Vector2(0, -20), new Vector2(1400, 180));
 
             var ctrl = UIKit.Img("ControlsBox", d, Palette.Panel, UIKit.Rounded).rectTransform;
-            ctrl.Place(new Vector2(0, -225), new Vector2(900, 150));
-            UIKit.Label("Controls", ctrl, game.ControlsText, 28, Palette.Muted, style: FontStyle.Normal).rectTransform.Stretch();
+            ctrl.Place(new Vector2(0, -225), new Vector2(1000, 170));
+            var controls = UIKit.Label("Controls", ctrl, game.ControlsText, 28, Palette.Muted, style: FontStyle.Normal);
+            controls.rectTransform.Stretch();
+            if (KeyRow(ctrl, game.KeyIcons, new Vector2(0, 38)))
+                controls.rectTransform.offsetMax = new Vector2(0, -78); // text under the icons
 
             skipText = UIKit.Label("Skip", d, "Space / Enter 로 바로 시작", 24, Palette.Muted, style: FontStyle.Normal);
             skipText.rectTransform.Place(new Vector2(0, -380), new Vector2(600, 36));
+        }
+
+        /// <summary>Row of key icons (theme sprites); "/" draws a small separator. False if nothing was drawn.</summary>
+        static bool KeyRow(RectTransform parent, string[] icons, Vector2 center)
+        {
+            var theme = UiTheme.Current;
+            if (theme == null || icons == null || icons.Length == 0) return false;
+            const float Size = 64f, Sep = 34f, Gap = 6f;
+            float width = 0f;
+            foreach (var name in icons) width += (name == "/" ? Sep : Size) + Gap;
+            width -= Gap;
+            float x = -width / 2f;
+            bool any = false;
+            foreach (var name in icons)
+            {
+                float w = name == "/" ? Sep : Size;
+                var pos = center + new Vector2(x + w / 2f, 0);
+                if (name == "/")
+                    UIKit.Label("Or", parent, "/", 34, Palette.Muted).rectTransform.Place(pos, new Vector2(w, Size));
+                else if (theme.Key(name) is Sprite sprite)
+                {
+                    var img = UIKit.Img(name, parent, Color.white, sprite);
+                    img.rectTransform.Place(pos, new Vector2(Size, Size));
+                    img.preserveAspect = true;
+                    any = true;
+                }
+                x += w + Gap;
+            }
+            return any;
         }
 
         public IEnumerator Run()
@@ -102,6 +134,7 @@ namespace MiniParty
                 label.rectTransform.Place(Vector2.zero, new Vector2(900, 300));
                 UIKit.Shadow(label, 8f, 0.6f);
                 var self = (RectTransform)transform;
+                if (s.Length > 1) Sfx.Go(); else Sfx.Tick();
                 if (s.Length > 1)
                 {
                     Juice.Ring(self, Vector2.zero, Palette.Gold, 700f, 0.4f);

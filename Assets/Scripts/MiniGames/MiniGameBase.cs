@@ -36,6 +36,8 @@ namespace MiniParty
         public abstract string Title { get; }
         public abstract string Rules { get; }
         public virtual string ControlsText => "W A S D / 방향키 이동 · Space 선택\n마우스 클릭도 가능";
+        /// <summary>Key icons shown on the intro card (Kenney Input Prompts file names, "/" = "or" separator).</summary>
+        public virtual string[] KeyIcons => new[] { "keyboard_arrows_all", "keyboard_space", "/", "mouse_left" };
 
         protected PlayerData[] Players;
         protected RectTransform Root;
@@ -159,6 +161,7 @@ namespace MiniParty
             stamp.rectTransform.localRotation = Quaternion.Euler(0, 0, won ? 8 : -6);
             UIKit.Shadow(stamp, 6f, 0.6f);
             StartCoroutine(Tween.Pop(stamp.transform, 2.2f, 0.35f));
+            if (won) Sfx.Win(); else Sfx.Lose();
             if (won)
             {
                 Juice.Sparkle(panel, new Vector2(0, y), Palette.Gold, 1.3f);

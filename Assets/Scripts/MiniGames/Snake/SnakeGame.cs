@@ -16,6 +16,7 @@ namespace MiniParty
         public override string Title => "스네이크 대결";
         public override string Rules => "한 경기장에서 두 뱀이 대결! 사과를 먹으면 길어집니다.\n벽·자기 몸·상대 뱀에 부딪히면 패배 (머리끼리 부딪히면 더 긴 쪽 승리)\n60초가 지나면 더 긴 뱀이 승리";
         public override string ControlsText => "W A S D 또는 방향키";
+        public override string[] KeyIcons => new[] { "keyboard_w", "keyboard_a", "keyboard_s", "keyboard_d", "/", "keyboard_arrows_all" };
 
         const int W = 28, H = 17;
         const float Cell = 32f;

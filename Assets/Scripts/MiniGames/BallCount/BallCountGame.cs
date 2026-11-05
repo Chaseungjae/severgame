@@ -16,6 +16,7 @@ namespace MiniParty
         public override string Title => "공 개수 세기";
         public override string Rules => "움직이는 공 중에서 제시된 색의 공이 몇 개인지 세세요!\n공이 사라지면 개수를 입력 — 정답에 더 가까운 사람이 승리\n(같으면 먼저 입력한 사람) · 3판 2선승";
         public override string ControlsText => "숫자키로 개수 입력 · Enter(또는 Space) 확정 · Backspace 지우기";
+        public override string[] KeyIcons => new[] { "keyboard_1", "keyboard_2", "keyboard_3", "keyboard_enter", "keyboard_backspace" };
 
         const int WinsNeeded = 2;
         const float WatchTime = 6f;
@@ -319,6 +320,7 @@ namespace MiniParty
             {
                 pk.Current = pk.Current < 0 || pk.Current >= 10 ? d : pk.Current * 10 + d; // two digits max
                 pk.Value.text = pk.Current.ToString();
+                Sfx.Tap();
                 StartCoroutine(Tween.Pop(pk.Value.transform, 1.15f, 0.1f));
             }
             else if (Controls.Backspace && pk.Current >= 0)

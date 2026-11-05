@@ -30,6 +30,7 @@ namespace MiniParty
         static Font font;
         static Sprite circle, rounded;
 
+        /// <summary>Body text font (rules, hints): Malgun Gothic from the OS.</summary>
         public static Font Font
         {
             get
@@ -37,6 +38,16 @@ namespace MiniParty
                 if (font == null)
                     font = Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "맑은 고딕", "Arial" }, 48);
                 return font;
+            }
+        }
+
+        /// <summary>Heading font (titles, buttons, numbers): the theme font (Jua) when set up, else the body font.</summary>
+        public static Font TitleFont
+        {
+            get
+            {
+                var theme = UiTheme.Current;
+                return theme != null && theme.titleFont != null ? theme.titleFont : Font;
             }
         }
 
@@ -140,12 +151,14 @@ namespace MiniParty
             TextAnchor align = TextAnchor.MiddleCenter, FontStyle style = FontStyle.Bold)
         {
             var t = Rect(name, parent).gameObject.AddComponent<Text>();
-            t.font = Font;
+            // bold labels use the heading font; it is already heavy, so no synthetic bold on top
+            bool heading = style == FontStyle.Bold && TitleFont != Font;
+            t.font = style == FontStyle.Normal ? Font : TitleFont;
             t.text = text;
             t.fontSize = size;
             t.color = color;
             t.alignment = align;
-            t.fontStyle = style;
+            t.fontStyle = heading ? FontStyle.Normal : style;
             t.horizontalOverflow = HorizontalWrapMode.Overflow;
             t.verticalOverflow = VerticalWrapMode.Overflow;
             t.raycastTarget = false;
@@ -161,9 +174,21 @@ namespace MiniParty
             img.rectTransform.Place(pos, size);
             var btn = img.gameObject.AddComponent<Button>();
             btn.targetGraphic = img;
+            btn.onClick.AddListener(Sfx.Click);
             btn.onClick.AddListener(() => onClick());
             var label = Label("Label", img.transform, text, fontSize, Color.white);
             label.rectTransform.Stretch();
+
+            var theme = UiTheme.Current;
+            if (theme != null && theme.button != null)
+            {
+                // Kenney button: light grey 9-slice with a bottom lip, tinted with the button color
+                img.sprite = theme.button;
+                img.type = Image.Type.Sliced;
+                img.color = Color.Lerp(bg, Color.white, 0.12f);
+                label.rectTransform.offsetMin = new Vector2(0, 6); // sit above the lip
+                Shadow(label, 2f, 0.45f);
+            }
             return btn;
         }
 

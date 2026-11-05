@@ -1,0 +1,1755 @@
+fileFormatVersion: 2
+guid: 4a0d1c5b8095cfd49ab5cd11017439c2
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 857762424635972268
+    second: piecesBlack_0
+  - first:
+      213: 330026755516148500
+    second: piecesBlack_1
+  - first:
+      213: -4915272759973002518
+    second: piecesBlack_2
+  - first:
+      213: -7153912708712265532
+    second: piecesBlack_3
+  - first:
+      213: -8831098441387310908
+    second: piecesBlack_4
+  - first:
+      213: -577976910156087939
+    second: piecesBlack_5
+  - first:
+      213: 9104226078335096910
+    second: piecesBlack_6
+  - first:
+      213: -5041097755673467823
+    second: piecesBlack_7
+  - first:
+      213: 5205135615771546568
+    second: piecesBlack_8
+  - first:
+      213: -491460965483036291
+    second: piecesBlack_9
+  - first:
+      213: -2986071592492284974
+    second: piecesBlack_10
+  - first:
+      213: -8499640043245511905
+    second: piecesBlack_11
+  - first:
+      213: -7510344806982737127
+    second: piecesBlack_12
+  - first:
+      213: -8985981244773749688
+    second: piecesBlack_13
+  - first:
+      213: -3382833731740794939
+    second: piecesBlack_14
+  - first:
+      213: 2372508367554255263
+    second: piecesBlack_15
+  - first:
+      213: 2134660143932775565
+    second: piecesBlack_16
+  - first:
+      213: -3393018026308384671
+    second: piecesBlack_17
+  - first:
+      213: 5523356947018475198
+    second: piecesBlack_18
+  - first:
+      213: -7580712904686912050
+    second: piecesBlack_19
+  - first:
+      213: -5367899418899419094
+    second: piecesBlack_20
+  - first:
+      213: -4112392355587356540
+    second: piecesBlack_21
+  - first:
+      213: -6476822272175050637
+    second: piecesBlack_22
+  - first:
+      213: 5342506219761881178
+    second: piecesBlack_23
+  - first:
+      213: -1700813237525653136
+    second: piecesBlack_24
+  - first:
+      213: -2894196140438956978
+    second: piecesBlack_25
+  - first:
+      213: -3651100762034670894
+    second: piecesBlack_26
+  - first:
+      213: -6779763929296006627
+    second: piecesBlack_27
+  - first:
+      213: 4193695291249305524
+    second: piecesBlack_28
+  - first:
+      213: 547059322747125469
+    second: piecesBlack_29
+  - first:
+      213: 740035092247376118
+    second: piecesBlack_30
+  - first:
+      213: 323768793305901799
+    second: piecesBlack_31
+  - first:
+      213: -6835140757694078285
+    second: piecesBlack_32
+  - first:
+      213: 2688238227571973941
+    second: piecesBlack_33
+  - first:
+      213: -8193982047246329456
+    second: piecesBlack_34
+  - first:
+      213: 3082038560533138541
+    second: piecesBlack_35
+  - first:
+      213: -3067150374163716627
+    second: piecesBlack_36
+  - first:
+      213: -2532549649883598123
+    second: piecesBlack_37
+  - first:
+      213: 1600462568972466052
+    second: piecesBlack_38
+  - first:
+      213: 6049802850065443538
+    second: piecesBlack_39
+  - first:
+      213: 7894152648482626908
+    second: piecesBlack_40
+  - first:
+      213: -4807751431948242141
+    second: piecesBlack_41
+  - first:
+      213: -3372841699915007007
+    second: piecesBlack_42
+  - first:
+      213: -8850907980696808471
+    second: piecesBlack_43
+  - first:
+      213: -8180462549241569002
+    second: piecesBlack_44
+  - first:
+      213: 6188179086093077911
+    second: piecesBlack_45
+  - first:
+      213: -8896453777874477056
+    second: piecesBlack_46
+  - first:
+      213: -8052192413242623749
+    second: piecesBlack_47
+  - first:
+      213: 7367068839833551932
+    second: piecesBlack_48
+  - first:
+      213: 2217077797898460826
+    second: piecesBlack_49
+  - first:
+      213: 8924024283725574396
+    second: piecesBlack_50
+  - first:
+      213: -2682661436371319392
+    second: piecesBlack_51
+  - first:
+      213: -6662353433880877553
+    second: piecesBlack_52
+  - first:
+      213: 6882190442486842373
+    second: piecesBlack_53
+  - first:
+      213: 5568089594139016866
+    second: piecesBlack_54
+  - first:
+      213: 7045678842822725669
+    second: piecesBlack_55
+  - first:
+      213: 748329150688747070
+    second: piecesBlack_56
+  - first:
+      213: 1480038572570054529
+    second: piecesBlack_57
+  - first:
+      213: -7770716463979761493
+    second: piecesBlack_58
+  - first:
+      213: -6459455748137628856
+    second: piecesBlack_59
+  - first:
+      213: 2963066546511861380
+    second: piecesBlack_60
+  - first:
+      213: -5916742405746844471
+    second: piecesBlack_61
+  - first:
+      213: -5576117861659898630
+    second: piecesBlack_62
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: piecesBlack_0
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 134
+        width: 28
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: caada1e616267eb00800000000000000
+      internalID: 857762424635972268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_1
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 136
+        width: 20
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41b2ae8e59d749400800000000000000
+      internalID: 330026755516148500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_2
+      rect:
+        serializedVersion: 2
+        x: 147
+        y: 135
+        width: 26
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae2c7af877179cbb0800000000000000
+      internalID: -4915272759973002518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_3
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 135
+        width: 40
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c88d036b4238bc90800000000000000
+      internalID: -7153912708712265532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_4
+      rect:
+        serializedVersion: 2
+        x: 277
+        y: 134
+        width: 23
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c08a98b1c2a17580800000000000000
+      internalID: -8831098441387310908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_5
+      rect:
+        serializedVersion: 2
+        x: 338
+        y: 134
+        width: 28
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7db4cdff0d9af7f0800000000000000
+      internalID: -577976910156087939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_6
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 134
+        width: 49
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e48d20ac165b85e70800000000000000
+      internalID: 9104226078335096910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_7
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 152
+        width: 48
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1546013dc4c6a0ab0800000000000000
+      internalID: -5041097755673467823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_8
+      rect:
+        serializedVersion: 2
+        x: 463
+        y: 135
+        width: 34
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c31cc9b34b5c3840800000000000000
+      internalID: 5205135615771546568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_9
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 154
+        width: 48
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d71c9631bdafd29f0800000000000000
+      internalID: -491460965483036291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_10
+      rect:
+        serializedVersion: 2
+        x: 524
+        y: 134
+        width: 40
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d3cc9f15b75f86d0800000000000000
+      internalID: -2986071592492284974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_11
+      rect:
+        serializedVersion: 2
+        x: 583
+        y: 133
+        width: 49
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1b5aa7e9663b0a80800000000000000
+      internalID: -8499640043245511905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_12
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 139
+        width: 33
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91328178035e5c790800000000000000
+      internalID: -7510344806982737127
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_13
+      rect:
+        serializedVersion: 2
+        x: 714
+        y: 137
+        width: 44
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84c20faeaa16b4380800000000000000
+      internalID: -8985981244773749688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_14
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 144
+        width: 44
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cf716dd4a2cd01d0800000000000000
+      internalID: -3382833731740794939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_15
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 141
+        width: 47
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9996ba4ac7dce020800000000000000
+      internalID: 2372508367554255263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_16
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 150
+        width: 17
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8c1c4b4716df9d10800000000000000
+      internalID: 2134660143932775565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_17
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 146
+        width: 51
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1684461051499e0d0800000000000000
+      internalID: -3393018026308384671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_18
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 146
+        width: 52
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb6e8ba11e7e6ac40800000000000000
+      internalID: 5523356947018475198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_19
+      rect:
+        serializedVersion: 2
+        x: 1105
+        y: 138
+        width: 7
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ecdbaeb07c5ebc690800000000000000
+      internalID: -7580712904686912050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_20
+      rect:
+        serializedVersion: 2
+        x: 1111
+        y: 153
+        width: 26
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a20797a3be36185b0800000000000000
+      internalID: -5367899418899419094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_21
+      rect:
+        serializedVersion: 2
+        x: 1170
+        y: 139
+        width: 6
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4880f24e0f8dde6c0800000000000000
+      internalID: -4112392355587356540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_22
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 155
+        width: 25
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 370faa98574bd16a0800000000000000
+      internalID: -6476822272175050637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_23
+      rect:
+        serializedVersion: 2
+        x: 909
+        y: 136
+        width: 37
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a50d83fd915642a40800000000000000
+      internalID: 5342506219761881178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_24
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 70
+        width: 28
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 079500c2f5f7568e0800000000000000
+      internalID: -1700813237525653136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_25
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 72
+        width: 20
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4454d2c1ffb5d7d0800000000000000
+      internalID: -2894196140438956978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_26
+      rect:
+        serializedVersion: 2
+        x: 147
+        y: 71
+        width: 26
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d2f3c7833fa45dc0800000000000000
+      internalID: -3651100762034670894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_27
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 71
+        width: 40
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d121e4580a079e1a0800000000000000
+      internalID: -6779763929296006627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_28
+      rect:
+        serializedVersion: 2
+        x: 277
+        y: 70
+        width: 23
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b7a423f5aff23a30800000000000000
+      internalID: 4193695291249305524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_29
+      rect:
+        serializedVersion: 2
+        x: 338
+        y: 70
+        width: 28
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dde786b3e8b879700800000000000000
+      internalID: 547059322747125469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_30
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 70
+        width: 49
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f07abadef1254a00800000000000000
+      internalID: 740035092247376118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_31
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 71
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eaea5a80024e7400800000000000000
+      internalID: 323768793305901799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_32
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 70
+        width: 48
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b2a9dbe1b3b421a0800000000000000
+      internalID: -6835140757694078285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_33
+      rect:
+        serializedVersion: 2
+        x: 583
+        y: 69
+        width: 49
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53f9d02dc6a8e4520800000000000000
+      internalID: 2688238227571973941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_34
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 75
+        width: 33
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09954f9ddb0294e80800000000000000
+      internalID: -8193982047246329456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_35
+      rect:
+        serializedVersion: 2
+        x: 714
+        y: 73
+        width: 44
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6c42a0ddb995ca20800000000000000
+      internalID: 3082038560533138541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_36
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 80
+        width: 44
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de5e3433cfa4f65d0800000000000000
+      internalID: -3067150374163716627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_37
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 77
+        width: 47
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d2f5aee2839adcd0800000000000000
+      internalID: -2532549649883598123
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_38
+      rect:
+        serializedVersion: 2
+        x: 909
+        y: 72
+        width: 37
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 487b9e31a3cf53610800000000000000
+      internalID: 1600462568972466052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_39
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 86
+        width: 17
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2daeb4f83a735f350800000000000000
+      internalID: 6049802850065443538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_40
+      rect:
+        serializedVersion: 2
+        x: 967
+        y: 82
+        width: 51
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5d148f320aad8d60800000000000000
+      internalID: 7894152648482626908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_41
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 82
+        width: 52
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32379529b8f674db0800000000000000
+      internalID: -4807751431948242141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_42
+      rect:
+        serializedVersion: 2
+        x: 1105
+        y: 74
+        width: 32
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ebf0f018524131d0800000000000000
+      internalID: -3372841699915007007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_43
+      rect:
+        serializedVersion: 2
+        x: 1170
+        y: 75
+        width: 31
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e395eee5124b2580800000000000000
+      internalID: -8850907980696808471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_44
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 4
+        width: 32
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 611e11647a8297e80800000000000000
+      internalID: -8180462549241569002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_45
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 6
+        width: 24
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79d4419a714d0e550800000000000000
+      internalID: 6188179086093077911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_46
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 5
+        width: 30
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0002c19ac62798480800000000000000
+      internalID: -8896453777874477056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_47
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 5
+        width: 44
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf8f39999add04090800000000000000
+      internalID: -8052192413242623749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_48
+      rect:
+        serializedVersion: 2
+        x: 275
+        y: 4
+        width: 27
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c34c022d3161d3660800000000000000
+      internalID: 7367068839833551932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_49
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 4
+        width: 32
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9e9427b284a4ce10800000000000000
+      internalID: 2217077797898460826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_50
+      rect:
+        serializedVersion: 2
+        x: 390
+        y: 4
+        width: 53
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf03c66fdc088db70800000000000000
+      internalID: 8924024283725574396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_51
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 5
+        width: 53
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a5c27013a545cad0800000000000000
+      internalID: -2682661436371319392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_52
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 4
+        width: 53
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f062d6db9d09a83a0800000000000000
+      internalID: -6662353433880877553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_53
+      rect:
+        serializedVersion: 2
+        x: 581
+        y: 3
+        width: 53
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50444097eb3728f50800000000000000
+      internalID: 6882190442486842373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_54
+      rect:
+        serializedVersion: 2
+        x: 654
+        y: 9
+        width: 37
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ae74302cf3d54d40800000000000000
+      internalID: 5568089594139016866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_55
+      rect:
+        serializedVersion: 2
+        x: 712
+        y: 7
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5201fe3f39747c160800000000000000
+      internalID: 7045678842822725669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_56
+      rect:
+        serializedVersion: 2
+        x: 776
+        y: 14
+        width: 48
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3e5fd1d569926a00800000000000000
+      internalID: 748329150688747070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_57
+      rect:
+        serializedVersion: 2
+        x: 838
+        y: 10
+        width: 51
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18f0aeb7d372a8410800000000000000
+      internalID: 1480038572570054529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_58
+      rect:
+        serializedVersion: 2
+        x: 907
+        y: 6
+        width: 41
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba0f43a0c8ed82490800000000000000
+      internalID: -7770716463979761493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_59
+      rect:
+        serializedVersion: 2
+        x: 965
+        y: 16
+        width: 55
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84bc6e188376b56a0800000000000000
+      internalID: -6459455748137628856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_60
+      rect:
+        serializedVersion: 2
+        x: 1027
+        y: 16
+        width: 56
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 486dea6335dee1920800000000000000
+      internalID: 2963066546511861380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_61
+      rect:
+        serializedVersion: 2
+        x: 1103
+        y: 8
+        width: 36
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cc18f5512283eda0800000000000000
+      internalID: -5916742405746844471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: piecesBlack_62
+      rect:
+        serializedVersion: 2
+        x: 1168
+        y: 9
+        width: 35
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afc0d0e2956ad92b0800000000000000
+      internalID: -5576117861659898630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      piecesBlack_0: 857762424635972268
+      piecesBlack_1: 330026755516148500
+      piecesBlack_10: -2986071592492284974
+      piecesBlack_11: -8499640043245511905
+      piecesBlack_12: -7510344806982737127
+      piecesBlack_13: -8985981244773749688
+      piecesBlack_14: -3382833731740794939
+      piecesBlack_15: 2372508367554255263
+      piecesBlack_16: 2134660143932775565
+      piecesBlack_17: -3393018026308384671
+      piecesBlack_18: 5523356947018475198
+      piecesBlack_19: -7580712904686912050
+      piecesBlack_2: -4915272759973002518
+      piecesBlack_20: -5367899418899419094
+      piecesBlack_21: -4112392355587356540
+      piecesBlack_22: -6476822272175050637
+      piecesBlack_23: 5342506219761881178
+      piecesBlack_24: -1700813237525653136
+      piecesBlack_25: -2894196140438956978
+      piecesBlack_26: -3651100762034670894
+      piecesBlack_27: -6779763929296006627
+      piecesBlack_28: 4193695291249305524
+      piecesBlack_29: 547059322747125469
+      piecesBlack_3: -7153912708712265532
+      piecesBlack_30: 740035092247376118
+      piecesBlack_31: 323768793305901799
+      piecesBlack_32: -6835140757694078285
+      piecesBlack_33: 2688238227571973941
+      piecesBlack_34: -8193982047246329456
+      piecesBlack_35: 3082038560533138541
+      piecesBlack_36: -3067150374163716627
+      piecesBlack_37: -2532549649883598123
+      piecesBlack_38: 1600462568972466052
+      piecesBlack_39: 6049802850065443538
+      piecesBlack_4: -8831098441387310908
+      piecesBlack_40: 7894152648482626908
+      piecesBlack_41: -4807751431948242141
+      piecesBlack_42: -3372841699915007007
+      piecesBlack_43: -8850907980696808471
+      piecesBlack_44: -8180462549241569002
+      piecesBlack_45: 6188179086093077911
+      piecesBlack_46: -8896453777874477056
+      piecesBlack_47: -8052192413242623749
+      piecesBlack_48: 7367068839833551932
+      piecesBlack_49: 2217077797898460826
+      piecesBlack_5: -577976910156087939
+      piecesBlack_50: 8924024283725574396
+      piecesBlack_51: -2682661436371319392
+      piecesBlack_52: -6662353433880877553
+      piecesBlack_53: 6882190442486842373
+      piecesBlack_54: 5568089594139016866
+      piecesBlack_55: 7045678842822725669
+      piecesBlack_56: 748329150688747070
+      piecesBlack_57: 1480038572570054529
+      piecesBlack_58: -7770716463979761493
+      piecesBlack_59: -6459455748137628856
+      piecesBlack_6: 9104226078335096910
+      piecesBlack_60: 2963066546511861380
+      piecesBlack_61: -5916742405746844471
+      piecesBlack_62: -5576117861659898630
+      piecesBlack_7: -5041097755673467823
+      piecesBlack_8: 5205135615771546568
+      piecesBlack_9: -491460965483036291
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

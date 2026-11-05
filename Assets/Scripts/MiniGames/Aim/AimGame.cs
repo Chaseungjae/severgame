@@ -14,6 +14,7 @@ namespace MiniParty
         public override string Title => "에임 대결";
         public override string Rules => "순간 나타났다 사라지는 적을 최대한 빨리 맞히세요! (일부는 움직임)\n두 사람에게 똑같은 위치·순서로 나옵니다.\n더 많이 맞힌 사람 승리 · 동점이면 평균 반응속도 승부";
         public override string ControlsText => "마우스로 조준 + 왼쪽 클릭";
+        public override string[] KeyIcons => new[] { "mouse_move", "mouse_left" };
 
         const int TargetCount = 24;
         const float FieldW = 820f, FieldH = 600f;

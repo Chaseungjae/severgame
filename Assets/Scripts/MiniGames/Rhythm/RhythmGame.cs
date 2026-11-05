@@ -16,6 +16,7 @@ namespace MiniParty
         public override string Title => "리듬 대결";
         public override string Rules => "떨어지는 노트가 판정선에 닿을 때 그 줄의 키를 누르세요! (4키 리듬게임)\nPERFECT 300 · GREAT 200 · GOOD 100 · MISS 0 — 같은 곡, 같은 채보\n점수가 더 높은 사람 승리 (동점이면 최대 콤보)";
         public override string ControlsText => "D F K L (또는 방향키 ← ↓ ↑ →)";
+        public override string[] KeyIcons => new[] { "keyboard_d", "keyboard_f", "keyboard_k", "keyboard_l" };
 
         const float LaneW = 96f, HighwayH = 640f, JudgeY = -250f, ScrollSpeed = 820f;
         const float Perfect = 0.045f, Great = 0.09f, Good = 0.14f;

@@ -14,6 +14,7 @@ namespace MiniParty
         public override string Title => "타이밍 서바이벌";
         public override string Rules => "움직이는 막대가 초록 구역 안에 있을 때 누르세요!\n성공할 때마다 구역은 좁아지고 속도는 빨라집니다.\n목숨 3개 — 더 오래 버틴 사람이 승리!";
         public override string ControlsText => "Space 또는 마우스 클릭";
+        public override string[] KeyIcons => new[] { "keyboard_space", "/", "mouse_left" };
 
         const int Lives = 3;
         const float BarW = 600f, BarH = 70f;
