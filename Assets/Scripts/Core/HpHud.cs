@@ -35,6 +35,7 @@ namespace MiniParty
 
             var panel = UIKit.Img($"P{p + 1}Panel", transform, Palette.Panel.WithAlpha(0.92f), UIKit.Rounded).rectTransform;
             panel.Place(new Vector2(s * 30, -20), new Vector2(760, 96), new Vector2(a, 1), new Vector2(a, 1));
+            UIKit.DropShadow(panel, 8f, 0.3f);
 
             var portrait = CharacterView.Create(panel, player.Character, 70);
             portrait.Rt.Place(new Vector2(s * 58, 12), new Vector2(70, 70), new Vector2(a, 0), new Vector2(0.5f, 0));

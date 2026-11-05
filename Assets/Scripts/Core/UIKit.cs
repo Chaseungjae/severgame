@@ -30,7 +30,7 @@ namespace MiniParty
         static Font font;
         static Sprite circle, rounded;
 
-        /// <summary>Body text font (rules, hints): Malgun Gothic from the OS.</summary>
+        /// <summary>OS fallback font (Malgun Gothic), used when no theme font is set up.</summary>
         public static Font Font
         {
             get
@@ -41,7 +41,7 @@ namespace MiniParty
             }
         }
 
-        /// <summary>Heading font (titles, buttons, numbers): the theme font (Jua) when set up, else the body font.</summary>
+        /// <summary>UI font: the theme font (Jua) when set up, else the OS font.</summary>
         public static Font TitleFont
         {
             get
@@ -62,6 +62,77 @@ namespace MiniParty
         public static Sprite Glow => glow != null ? glow : glow = MakeRadial(128, "Glow", d => Mathf.Pow(Mathf.Clamp01(1f - d), 2f));
         /// <summary>Transparent center, opaque edges (screen vignette).</summary>
         public static Sprite Vignette => vignette != null ? vignette : vignette = MakeRadial(128, "Vignette", d => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((d - 0.55f) / 0.6f)));
+
+        static Sprite gradient, dots;
+
+        /// <summary>Vertical fade: opaque at the top, transparent at the bottom.</summary>
+        public static Sprite Gradient
+        {
+            get
+            {
+                if (gradient != null) return gradient;
+                var tex = new Texture2D(1, 64, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "Gradient" };
+                for (int y = 0; y < 64; y++) tex.SetPixel(0, y, new Color(1, 1, 1, Mathf.SmoothStep(0f, 1f, y / 63f)));
+                tex.Apply();
+                return gradient = Sprite.Create(tex, new Rect(0, 0, 1, 64), new Vector2(0.5f, 0.5f), 100);
+            }
+        }
+
+        /// <summary>Tileable 40px cell with one soft dot (background pattern).</summary>
+        public static Sprite Dots
+        {
+            get
+            {
+                if (dots != null) return dots;
+                const int S = 40;
+                var tex = new Texture2D(S, S, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Bilinear, name = "Dots" };
+                var px = new Color32[S * S];
+                for (int y = 0; y < S; y++)
+                for (int x = 0; x < S; x++)
+                {
+                    float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(S / 2f, S / 2f));
+                    px[y * S + x] = new Color32(255, 255, 255, (byte)(Mathf.Clamp01(2.6f - d) * 255));
+                }
+                tex.SetPixels32(px);
+                tex.Apply();
+                return dots = Sprite.Create(tex, new Rect(0, 0, S, S), new Vector2(0.5f, 0.5f), 100, 0, SpriteMeshType.FullRect);
+            }
+        }
+
+        /// <summary>
+        /// Full-screen game background: base color, a soft light from the top, a faint dot pattern and a vignette.
+        /// Returns the base image; anything parented to it later draws on top of the decoration.
+        /// </summary>
+        public static Image Backdrop(Transform parent, string name = "Bg")
+        {
+            var bg = Img(name, parent, Palette.Bg);
+            bg.rectTransform.Stretch();
+            var light = Img("TopLight", bg.transform, Palette.Hex("#3A4290").WithAlpha(0.45f), Gradient);
+            light.rectTransform.Stretch();
+            light.rectTransform.anchorMin = new Vector2(0, 0.35f);
+            var pattern = Img("Dots", bg.transform, Color.white.WithAlpha(0.035f), Dots);
+            pattern.type = Image.Type.Tiled;
+            pattern.rectTransform.Stretch();
+            var vignette = Img("Vignette", bg.transform, new Color(0.02f, 0.02f, 0.08f, 0.55f), Vignette);
+            vignette.rectTransform.Stretch();
+            vignette.rectTransform.offsetMin = new Vector2(-260, -200);
+            vignette.rectTransform.offsetMax = new Vector2(260, 200);
+            return bg;
+        }
+
+        /// <summary>Soft drop shadow drawn just behind a (rounded) panel. Call right after creating the panel.</summary>
+        public static Image DropShadow(RectTransform panel, float depth = 10f, float alpha = 0.32f)
+        {
+            var shadow = Img(panel.name + "Shadow", panel.parent, new Color(0.02f, 0.02f, 0.08f, alpha), Rounded);
+            var rt = shadow.rectTransform;
+            rt.anchorMin = panel.anchorMin;
+            rt.anchorMax = panel.anchorMax;
+            rt.pivot = panel.pivot;
+            rt.sizeDelta = panel.sizeDelta + new Vector2(6, 6);
+            rt.anchoredPosition = panel.anchoredPosition + new Vector2(0, -depth);
+            rt.SetSiblingIndex(panel.GetSiblingIndex());
+            return shadow;
+        }
 
         /// <summary>Alpha as a function of the normalized distance from the center (0 center, 1 edge).</summary>
         static Sprite MakeRadial(int size, string name, System.Func<float, float> alpha)
@@ -151,14 +222,14 @@ namespace MiniParty
             TextAnchor align = TextAnchor.MiddleCenter, FontStyle style = FontStyle.Bold)
         {
             var t = Rect(name, parent).gameObject.AddComponent<Text>();
-            // bold labels use the heading font; it is already heavy, so no synthetic bold on top
-            bool heading = style == FontStyle.Bold && TitleFont != Font;
-            t.font = style == FontStyle.Normal ? Font : TitleFont;
+            // every label uses the theme font (Jua); it is already heavy, so no synthetic bold on top
+            bool themed = TitleFont != Font;
+            t.font = TitleFont;
             t.text = text;
             t.fontSize = size;
             t.color = color;
             t.alignment = align;
-            t.fontStyle = heading ? FontStyle.Normal : style;
+            t.fontStyle = themed ? FontStyle.Normal : style;
             t.horizontalOverflow = HorizontalWrapMode.Overflow;
             t.verticalOverflow = VerticalWrapMode.Overflow;
             t.raycastTarget = false;
@@ -198,5 +269,32 @@ namespace MiniParty
             s.effectColor = new Color(0, 0, 0, alpha);
             s.effectDistance = new Vector2(0, -dist);
         }
+    }
+}
+
+namespace MiniParty
+{
+    /// <summary>Keeps a drop shadow (a sibling image) glued to its panel when the panel is moved, resized or scaled.</summary>
+    public class FollowShadow : MonoBehaviour
+    {
+        public RectTransform Shadow;
+        public float Depth = 10f;
+
+        void LateUpdate()
+        {
+            if (Shadow == null) return;
+            var rt = (RectTransform)transform;
+            Shadow.anchorMin = rt.anchorMin;
+            Shadow.anchorMax = rt.anchorMax;
+            Shadow.pivot = rt.pivot;
+            Shadow.sizeDelta = rt.sizeDelta + new Vector2(6, 6);
+            Shadow.anchoredPosition = rt.anchoredPosition + new Vector2(0, -Depth);
+            Shadow.localScale = rt.localScale;
+            Shadow.localRotation = rt.localRotation;
+        }
+
+        void OnEnable() { if (Shadow) Shadow.gameObject.SetActive(true); }
+        void OnDisable() { if (Shadow) Shadow.gameObject.SetActive(false); }
+        void OnDestroy() { if (Shadow) Destroy(Shadow.gameObject); }
     }
 }

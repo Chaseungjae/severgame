@@ -45,6 +45,7 @@ namespace MiniParty
             public RectTransform Panel;
             public Die[] Dice = new Die[DiceCount];
             public Text Hand, Status, Rolls, Timer;
+            public Image[] RollPips = new Image[MaxRolls];
             public GameObject Buttons;
             public int[] Values = new int[DiceCount];
             public bool[] Held = new bool[DiceCount];
@@ -81,6 +82,12 @@ namespace MiniParty
 
                 l.Rolls = UIKit.Label("Rolls", l.Panel, "", 30, Palette.Muted, TextAnchor.MiddleLeft);
                 l.Rolls.rectTransform.Place(new Vector2(-370, 270), new Vector2(360, 44), pivot: new Vector2(0, 0.5f));
+                l.Rolls.text = "남은 기회";
+                for (int k = 0; k < MaxRolls; k++)
+                {
+                    l.RollPips[k] = UIKit.Img("RollPip", l.Panel, Palette.Gold, UIKit.Circle);
+                    l.RollPips[k].rectTransform.Place(new Vector2(-220 + k * 34, 270), new Vector2(24, 24));
+                }
                 l.Timer = UIKit.Label("Timer", l.Panel, "", 30, Palette.Muted, TextAnchor.MiddleRight, FontStyle.Normal);
                 l.Timer.rectTransform.Place(new Vector2(370, 270), new Vector2(200, 44), pivot: new Vector2(1, 0.5f));
 
@@ -182,7 +189,8 @@ namespace MiniParty
         void ShowRolls(Lane l)
         {
             int left = MaxRolls - l.RollsUsed;
-            l.Rolls.text = $"남은 기회  {new string('●', left)}{new string('○', MaxRolls - left)}";
+            for (int k = 0; k < MaxRolls; k++)
+                l.RollPips[k].color = k < left ? Palette.Gold : Color.white.WithAlpha(0.15f);
         }
 
         // ---------- hands ----------

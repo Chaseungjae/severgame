@@ -33,5 +33,44 @@ namespace MiniParty.EditorTools
             ScreenCapture.CaptureScreenshot(path);
             Debug.Log($"[Shot] {path}");
         }
+
+        /// <summary>
+        /// Sets the Game view to a fixed 1920x1080 so text renders at its real size (a small Game view
+        /// rasterizes small Korean text at a few pixels and it looks broken). Uses internal editor API by reflection.
+        /// </summary>
+        [MenuItem("MiniParty/Test/Game 창 1920x1080")]
+        static void FullHd()
+        {
+            var asm = typeof(EditorWindow).Assembly;
+            var sizesType = asm.GetType("UnityEditor.GameViewSizes");
+            var singleton = typeof(ScriptableSingleton<>).MakeGenericType(sizesType);
+            var sizes = singleton.GetProperty("instance").GetValue(null);
+            var group = sizesType.GetMethod("GetGroup").Invoke(sizes, new object[] { (int)GameViewSizeGroupType.Standalone });
+            var groupType = group.GetType();
+
+            int index = -1;
+            int count = (int)groupType.GetMethod("GetTotalCount").Invoke(group, null);
+            var getSize = groupType.GetMethod("GetGameViewSize");
+            for (int i = 0; i < count; i++)
+            {
+                var s = getSize.Invoke(group, new object[] { i });
+                var t = s.GetType();
+                if ((int)t.GetProperty("width").GetValue(s) == 1920 && (int)t.GetProperty("height").GetValue(s) == 1080
+                    && t.GetProperty("sizeType").GetValue(s).ToString() == "FixedResolution") { index = i; break; }
+            }
+            if (index < 0)
+            {
+                var sizeType = asm.GetType("UnityEditor.GameViewSize");
+                var kind = asm.GetType("UnityEditor.GameViewSizeType");
+                var size = System.Activator.CreateInstance(sizeType, System.Enum.Parse(kind, "FixedResolution"), 1920, 1080, "MiniParty 1080p");
+                groupType.GetMethod("AddCustomSize").Invoke(group, new[] { size });
+                index = count;
+            }
+
+            var gameView = EditorWindow.GetWindow(asm.GetType("UnityEditor.GameView"));
+            gameView.GetType().GetMethod("SizeSelectionCallback", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)
+                ?.Invoke(gameView, new object[] { index, null });
+            Debug.Log($"[Shot] Game 창 1920x1080 (index {index})");
+        }
     }
 }

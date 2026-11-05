@@ -27,8 +27,7 @@ namespace MiniParty
 
         void Build(int round)
         {
-            var bg = UIKit.Img("Card", transform, Palette.Bg);
-            bg.rectTransform.Stretch();
+            var bg = UIKit.Backdrop(transform, "Card");
             card = bg.gameObject.AddComponent<CanvasGroup>();
 
             UIKit.Label("Round", bg.transform, $"ROUND {round}", 48, Palette.Gold).rectTransform.Place(new Vector2(0, 340), new Vector2(600, 70));
@@ -37,6 +36,7 @@ namespace MiniParty
 
             var box = UIKit.Img("TitleBox", bg.transform, Palette.PanelLight, UIKit.Rounded).rectTransform;
             box.Place(new Vector2(0, 165), new Vector2(900, 150));
+            UIKit.DropShadow(box);
             titleText = UIKit.Label("Title", box, "? ? ?", 84, Color.white);
             titleText.rectTransform.Stretch();
             UIKit.Shadow(titleText, 5f);
@@ -49,6 +49,7 @@ namespace MiniParty
 
             var ctrl = UIKit.Img("ControlsBox", d, Palette.Panel, UIKit.Rounded).rectTransform;
             ctrl.Place(new Vector2(0, -225), new Vector2(1000, 170));
+            UIKit.DropShadow(ctrl, 8f, 0.25f);
             var controls = UIKit.Label("Controls", ctrl, game.ControlsText, 28, Palette.Muted, style: FontStyle.Normal);
             controls.rectTransform.Stretch();
             if (KeyRow(ctrl, game.KeyIcons, new Vector2(0, 38)))

@@ -44,7 +44,7 @@ namespace MiniParty
 
         protected override void Build()
         {
-            UIKit.Img("Bg", Root, Palette.Bg).rectTransform.Stretch();
+            UIKit.Backdrop(Root);
 
             // Same shuffled layout for both players (and for both PCs online, via the shared seed)
             for (int p = 0; p < 2; p++) boards[p] = BuildBoard(p, new System.Random(Seed));

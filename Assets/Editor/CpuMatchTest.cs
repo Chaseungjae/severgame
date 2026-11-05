@@ -102,7 +102,7 @@ namespace MiniParty.EditorTools
             backup = null;
         }
 
-        static void Shot(string name) => ScreenCapture.CaptureScreenshot(Path.Combine(ShotDir, name + ".png"));
+        static void Shot(string name) => ScreenCapture.CaptureScreenshot(Path.Combine(ShotDir, name + ".png"), 2);
 
         static void Tick()
         {

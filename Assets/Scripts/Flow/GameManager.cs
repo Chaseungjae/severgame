@@ -210,8 +210,7 @@ namespace MiniParty
 
             var msg = UIKit.Label("Disconnected", overlay, "상대와 연결이 끊겼습니다\n로비로 돌아갑니다", 56, Color.white);
             msg.rectTransform.Place(Vector2.zero, new Vector2(1200, 200));
-            var bg = UIKit.Img("Bg", overlay, Palette.Bg);
-            bg.rectTransform.Stretch();
+            var bg = UIKit.Backdrop(overlay);
             bg.transform.SetAsFirstSibling();
             yield return fader.FadeTo(0f, 0.3f);
             yield return new WaitForSeconds(2.5f);

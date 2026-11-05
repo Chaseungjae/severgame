@@ -140,14 +140,19 @@ namespace MiniParty
 
         // ---------- shared layout helpers ----------
 
-        protected void Background() => UIKit.Img("Bg", Root, Palette.Bg).rectTransform.Stretch();
+        protected void Background() => UIKit.Backdrop(Root);
 
         /// <summary>Standard left/right player panel with a colored name header.</summary>
         protected RectTransform PlayerPanel(int p, float width = 660f, float height = 820f, float y = -70f)
         {
             var panel = UIKit.Img($"Panel{p + 1}", Root, Palette.Panel, UIKit.Rounded).rectTransform;
             panel.Place(new Vector2(p == 0 ? -450 : 450, y), new Vector2(width, height));
-            var header = UIKit.Label("Header", panel, Players[p].DisplayName, 34, Players[p].Color);
+            panel.gameObject.AddComponent<FollowShadow>().Shadow = UIKit.DropShadow(panel).rectTransform;
+            // tinted name strip in the player's color
+            var band = UIKit.Img("HeaderBand", panel, Color.Lerp(Palette.Panel, Players[p].Color, 0.55f), UIKit.Rounded).rectTransform;
+            band.Place(new Vector2(0, -12), new Vector2(width - 24, 58), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+            var header = UIKit.Label("Header", panel, Players[p].DisplayName, 34, Color.white);
+            UIKit.Shadow(header, 2f, 0.35f);
             header.rectTransform.Place(new Vector2(0, -40), new Vector2(width - 40, 50), new Vector2(0.5f, 1f));
             return panel;
         }

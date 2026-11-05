@@ -54,7 +54,7 @@ namespace MiniParty
 
         void Build()
         {
-            UIKit.Img("Bg", transform, Palette.Bg).rectTransform.Stretch();
+            UIKit.Backdrop(transform);
 
             var title = UIKit.Label("Title", transform, "MINI PARTY BATTLE", 88, Palette.Gold);
             title.rectTransform.Place(new Vector2(0, 420), new Vector2(1200, 110));
@@ -71,6 +71,7 @@ namespace MiniParty
                 float x = p == 0 ? -420 : 420;
                 var panel = UIKit.Img($"P{p + 1}Panel", transform, Palette.Panel, UIKit.Rounded).rectTransform;
                 panel.Place(new Vector2(x, -30), new Vector2(640, 620));
+                UIKit.DropShadow(panel);
 
                 tags[p] = UIKit.Label("Tag", panel, $"P{p + 1}", 60, Color.white);
                 tags[p].rectTransform.Place(new Vector2(0, 250), new Vector2(300, 80));
