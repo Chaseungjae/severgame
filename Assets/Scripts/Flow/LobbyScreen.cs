@@ -61,6 +61,9 @@ namespace MiniParty
             UIKit.Shadow(title, 6f);
             UIKit.Label("Sub", transform, "캐릭터를 고르고 준비하세요 — 미니게임에서 지면 벌칙! HP가 먼저 0이 되면 패배", 30, Palette.Muted, style: FontStyle.Normal)
                 .rectTransform.Place(new Vector2(0, 340), new Vector2(1400, 44));
+            if (MiniGameRegistry.ActiveGroup > 0)
+                UIKit.Label("Group", transform, $"[{MiniGameRegistry.GroupNames[MiniGameRegistry.ActiveGroup]}] 테스트 씬 — 이 조의 미니게임만 나와요", 28, Palette.Gold)
+                    .rectTransform.Place(new Vector2(0, 500), new Vector2(1400, 44));
 
             for (int p = 0; p < 2; p++)
             {

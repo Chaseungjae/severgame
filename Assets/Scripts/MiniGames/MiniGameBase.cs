@@ -274,49 +274,63 @@ namespace MiniParty
 
     public static class MiniGameRegistry
     {
-        /// <summary>Add new minigames here. The round picker draws randomly from this list.</summary>
-        public static readonly (string Title, Type Type)[] Games =
+        /// <summary>
+        /// All minigames = the four group lists (Scripts/MiniGames/GroupN_*/GroupNGames.cs) in a fixed order, so both
+        /// online players resolve the same index to the same game. Add games to your group's file, not here.
+        /// </summary>
+        public static readonly (string Title, Type Type)[] Games = Concat(Group1Games.Games, Group2Games.Games, Group3Games.Games, Group4Games.Games);
+
+        static readonly int[] GroupOf = GroupIndices(Group1Games.Games, Group2Games.Games, Group3Games.Games, Group4Games.Games);
+
+        public static readonly string[] GroupNames = { "전체", Group1Games.Name, Group2Games.Name, Group3Games.Name, Group4Games.Name };
+
+        /// <summary>
+        /// 0 = every game. 1-4 = only that group's games (set by GameManager when a Groups/GroupN_* scene is open,
+        /// so each group can test their own games without touching the main scene).
+        /// </summary>
+        public static int ActiveGroup;
+
+        static (string, Type)[] Concat(params (string, Type)[][] lists)
         {
-            ("1 to 50", typeof(OneToFiftyGame)),
-            ("스페이스바 줄다리기", typeof(SpaceTugGame)),
-            ("CPS 클릭 대결", typeof(CpsGame)),
-            ("F1 반응 속도", typeof(F1ReactionGame)),
-            ("에임 대결", typeof(AimGame)),
-            ("공 개수 세기", typeof(BallCountGame)),
-            ("100층 도전", typeof(StairsGame)),
-            ("블럭 쌓기", typeof(StackGame)),
-            ("원을 그려봐요", typeof(CircleGame)),
-            ("타자 대결", typeof(TypingGame)),
-            ("방향키 입력 대결", typeof(ArrowGame)),
-            ("타이밍 서바이벌", typeof(TimingGame)),
-            ("사목", typeof(ConnectFourGame)),
-            ("오델로", typeof(OthelloGame)),
-            ("색깔 찾기", typeof(ColorGame)),
-            ("표창 막기", typeof(ShurikenGame)),
-            ("죽림고수", typeof(BambooGame)),
-            ("리듬 대결", typeof(RhythmGame)),
-            ("스네이크 대결", typeof(SnakeGame)),
-            ("순간 기억력", typeof(MemoryGame)),
-            ("10초 맞추기", typeof(TenSecondsGame)),
-            ("야추 다이스", typeof(YachtGame)),
-        };
+            var all = new System.Collections.Generic.List<(string, Type)>();
+            foreach (var l in lists) all.AddRange(l);
+            return all.ToArray();
+        }
+
+        static int[] GroupIndices(params (string, Type)[][] lists)
+        {
+            var groups = new System.Collections.Generic.List<int>();
+            for (int g = 0; g < lists.Length; g++)
+                foreach (var _ in lists[g]) groups.Add(g + 1);
+            return groups.ToArray();
+        }
+
+        /// <summary>Game indices the round picker may use (the active group, or all).</summary>
+        static System.Collections.Generic.List<int> Pool()
+        {
+            var pool = new System.Collections.Generic.List<int>();
+            for (int i = 0; i < Games.Length; i++)
+                if (ActiveGroup == 0 || GroupOf[i] == ActiveGroup) pool.Add(i);
+            if (pool.Count == 0) for (int i = 0; i < Games.Length; i++) pool.Add(i);
+            return pool;
+        }
 
         static int last = -1;
 
         /// <summary>Random minigame index, never the same as the previous round.</summary>
         public static int PickIndex()
         {
-            int i = UnityEngine.Random.Range(0, Games.Length);
-            if (Games.Length > 1 && i == last) i = (i + 1 + UnityEngine.Random.Range(0, Games.Length - 1)) % Games.Length;
+            var pool = Pool();
+            int i = pool[UnityEngine.Random.Range(0, pool.Count)];
+            if (pool.Count > 1 && i == last) i = pool[(pool.IndexOf(i) + 1 + UnityEngine.Random.Range(0, pool.Count - 1)) % pool.Count];
             last = i;
             return i;
         }
 
-        /// <summary>All minigame indices in random order (no repeats until every game was played).</summary>
+        /// <summary>Minigame indices in random order (no repeats until every game in the pool was played).</summary>
         public static System.Collections.Generic.List<int> ShuffledDeck()
         {
-            var deck = new System.Collections.Generic.List<int>();
-            for (int i = 0; i < Games.Length; i++) deck.Add(i);
+            var deck = Pool();
             for (int i = deck.Count - 1; i > 0; i--)
             {
                 int j = UnityEngine.Random.Range(0, i + 1);

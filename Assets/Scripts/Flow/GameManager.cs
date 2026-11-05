@@ -34,6 +34,9 @@ namespace MiniParty
         {
             Application.targetFrameRate = 60;
             Application.runInBackground = true; // online: keep simulating while the window is unfocused
+            // group test scenes (Scenes/Groups/Group2_Brain.unity ...) only play that group's minigames
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            MiniGameRegistry.ActiveGroup = scene.StartsWith("Group") && scene.Length > 5 && char.IsDigit(scene[5]) ? scene[5] - '0' : 0;
             EnsureEventSystem();
             NetSession.EnsureNetworkManager();
             BuildCanvas();
