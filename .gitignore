@@ -56,3 +56,7 @@ desktop.ini
 # Unity crash recovery scenes
 Assets/_Recovery/
 Assets/_Recovery.meta
+
+# 1조 전용 UDP 서버 (UDPServer/Group1Server): 프로젝트 파일은 올리고 빌드 결과는 올리지 않는다
+!UDPServer/Group1Server/Group1Server.csproj
+UDPServer/Group1Server/bin/

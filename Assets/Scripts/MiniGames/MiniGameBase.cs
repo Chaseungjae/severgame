@@ -295,6 +295,12 @@ namespace MiniParty
         /// </summary>
         public static int ActiveGroup;
 
+        /// <summary>
+        /// 테스트용: 0 이상이면 라운드마다 이 게임(Games 번호)만 나온다. 조별 테스트 패널(Group1TestPanel 등)이 쓴다.
+        /// 온라인에서는 게임을 고르는 쪽(방장)에서만 효과가 있으므로 양쪽이 어긋나지 않는다.
+        /// </summary>
+        public static int ForcedGame = -1;
+
         static (string, Type)[] Concat(params (string, Type)[][] lists)
         {
             var all = new System.Collections.Generic.List<(string, Type)>();
@@ -314,6 +320,11 @@ namespace MiniParty
         static System.Collections.Generic.List<int> Pool()
         {
             var pool = new System.Collections.Generic.List<int>();
+            if (ForcedGame >= 0 && ForcedGame < Games.Length)
+            {
+                pool.Add(ForcedGame);
+                return pool;
+            }
             for (int i = 0; i < Games.Length; i++)
                 if (ActiveGroup == 0 || GroupOf[i] == ActiveGroup) pool.Add(i);
             if (pool.Count == 0) for (int i = 0; i < Games.Length; i++) pool.Add(i);

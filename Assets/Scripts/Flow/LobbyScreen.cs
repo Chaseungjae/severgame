@@ -12,7 +12,8 @@ namespace MiniParty
     /// Step 1: character select. One PC is always one human player. Two modes:
     ///  - CPU 대전: you vs the CPU (P1 can also be set to CPU to watch a CPU vs CPU test match).
     ///  - Online: pick your character, then play a friend:
-    ///      빠른 매칭 (any open room) · 방 만들기 → share the code · 코드로 참가 · IP 직접 연결 (LAN / VPN).
+    ///      빠른 매칭 (any open room) · 방 만들기 → share the code · 코드로 참가 · IP 직접 연결 (LAN / VPN)
+    ///      · 1조 전용 서버 (UDPServer/Group1Server 에 접속, 서버가 방장이고 1조 게임만 나옴).
     /// </summary>
     public class LobbyScreen : MonoBehaviour
     {
@@ -21,7 +22,9 @@ namespace MiniParty
         /// <summary>Set when an online match was found. Null for local play.</summary>
         public NetSession Session { get; private set; }
 
-        enum View { Menu, EnterCode, IpMenu, EnterIp, Busy, Matched }
+        enum View { Menu, EnterCode, IpMenu, EnterIp, EnterServer, Busy, Matched }
+
+        const string ServerAddressKey = "Group1ServerAddress";
 
         readonly int[] selection = { 0, 1 };
         readonly bool[] ready = new bool[2];
@@ -137,10 +140,14 @@ namespace MiniParty
 
             AddButton(View.IpMenu, "내가 방 열기", new Vector2(-150, -170), blue, () => StartConnect(NetSession.Mode.HostDirect, null));
             AddButton(View.IpMenu, "IP로 참가", new Vector2(150, -170), green, () => Show(View.EnterIp));
-            AddButton(View.IpMenu, "뒤로", new Vector2(0, -245), Palette.PanelLight, () => Show(View.Menu));
+            AddButton(View.IpMenu, "1조 전용 서버", new Vector2(-150, -245), Palette.Hex("#D9822B"), () => Show(View.EnterServer));
+            AddButton(View.IpMenu, "뒤로", new Vector2(150, -245), Palette.PanelLight, () => Show(View.Menu));
 
             AddButton(View.EnterIp, "접속", new Vector2(-150, -210), green, SubmitEntry);
             AddButton(View.EnterIp, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.IpMenu));
+
+            AddButton(View.EnterServer, "서버 접속", new Vector2(-150, -210), green, SubmitEntry);
+            AddButton(View.EnterServer, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.IpMenu));
 
             AddButton(View.Busy, "취소", new Vector2(0, -210), Palette.Red, () => cancel?.Cancel());
 
@@ -160,7 +167,8 @@ namespace MiniParty
                 foreach (var go in pair.Value) go.SetActive(pair.Key == v);
 
             entry.Clear();
-            bool entering = v == View.EnterCode || v == View.EnterIp;
+            if (v == View.EnterServer) entry.Append(PlayerPrefs.GetString(ServerAddressKey, "127.0.0.1")); // 지난번 주소
+            bool entering = Entering(v);
             field.gameObject.SetActive(entering);
             copyButton.SetActive(false);
             switch (v)
@@ -177,6 +185,9 @@ namespace MiniParty
                 case View.EnterIp:
                     SetStatus("방 연 친구의 IP를 입력하세요 (예: 192.168.0.5)", Palette.Muted);
                     break;
+                case View.EnterServer:
+                    SetStatus("1조 전용 서버 주소 (예: 192.168.0.5 / 포트 생략 시 33333)\n서버가 게임 추첨·승패 판정 · 1조 게임만 나와요", Palette.Muted);
+                    break;
             }
             RefreshEntry();
             RefreshStatus(0);
@@ -188,9 +199,11 @@ namespace MiniParty
             onlineStatus.color = color;
         }
 
+        static bool Entering(View v) => v == View.EnterCode || v == View.EnterIp || v == View.EnterServer;
+
         void RefreshEntry()
         {
-            if (view == View.EnterCode || view == View.EnterIp)
+            if (Entering(view))
                 fieldText.text = entry + "<color=#9AA3C7>|</color>";
         }
 
@@ -219,7 +232,7 @@ namespace MiniParty
 
         void OnChar(char c)
         {
-            if (view != View.EnterCode && view != View.EnterIp) return;
+            if (!Entering(view)) return;
             if (!Accept(c)) return;
             if (entry.Length >= (view == View.EnterCode ? 10 : 40)) return;
             entry.Append(view == View.EnterCode ? char.ToUpperInvariant(c) : c);
@@ -249,13 +262,19 @@ namespace MiniParty
                 RefreshEntry();
             }
             if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) SubmitEntry();
-            if (kb.escapeKey.wasPressedThisFrame) Show(view == View.EnterIp ? View.IpMenu : View.Menu);
+            if (kb.escapeKey.wasPressedThisFrame) Show(view == View.EnterIp || view == View.EnterServer ? View.IpMenu : View.Menu);
         }
 
         void SubmitEntry()
         {
             string text = entry.ToString().Trim();
             if (text.Length == 0) return;
+            if (view == View.EnterServer)
+            {
+                PlayerPrefs.SetString(ServerAddressKey, text);
+                StartConnect(NetSession.Mode.DedicatedServer, text);
+                return;
+            }
             StartConnect(view == View.EnterCode ? NetSession.Mode.JoinRoom : NetSession.Mode.JoinDirect, text);
         }
 
@@ -269,7 +288,7 @@ namespace MiniParty
 
         IEnumerator ConnectRoutine(NetSession.Mode mode, string arg)
         {
-            var back = view == View.EnterIp || view == View.IpMenu ? View.IpMenu : View.Menu;
+            var back = view == View.EnterServer ? View.EnterServer : view == View.EnterIp || view == View.IpMenu ? View.IpMenu : View.Menu;
             Show(View.Busy);
             var session = new NetSession();
             pending = session;
@@ -297,7 +316,7 @@ namespace MiniParty
                 yield break;
             }
 
-            // handshake: swap characters (host = P1, client = P2)
+            // handshake: swap characters (host = P1, client = P2; 1조 전용 서버면 서버가 정한 순서)
             SetStatus("상대 정보 받는 중...", Palette.Muted);
             int hostChar = 0, clientChar = 0;
             if (session.IsHost)
@@ -339,7 +358,7 @@ namespace MiniParty
 
             Session = session;
             Show(View.Matched);
-            int opponentChar = session.IsHost ? clientChar : hostChar;
+            int opponentChar = session.LocalIndex == 0 ? clientChar : hostChar;
             var def = Roster.All[Mathf.Clamp(opponentChar, 0, Roster.All.Length - 1)];
             placeholder.gameObject.SetActive(false);
             var opponent = CharacterView.Create(opponentSlot, def, 150);
@@ -348,7 +367,7 @@ namespace MiniParty
 
             selectedHost = hostChar;
             selectedClient = clientChar;
-            SetStatus($"상대 발견! ({def.Name}) — {(session.IsHost ? "내가 P1" : "내가 P2")}", Palette.Green);
+            SetStatus($"상대 발견! ({def.Name}) — 내가 P{session.LocalIndex + 1}", Palette.Green);
             RefreshStatus(0);
         }
 
@@ -448,6 +467,11 @@ namespace MiniParty
                 RebuildPreview(0);
                 StartConnect(NetSession.Mode.JoinDirect, ip);
             }
+            else if (DevArgs.Get("-autoserver") is string server)
+            {
+                SetMode(true);
+                StartConnect(NetSession.Mode.DedicatedServer, server);
+            }
 
             while (true)
             {
@@ -459,7 +483,7 @@ namespace MiniParty
                         if (Controls.Left(0) || Controls.Left(1)) Change(0, -1);
                         if (Controls.Right(0) || Controls.Right(1)) Change(0, 1);
                     }
-                    else if (view == View.EnterCode || view == View.EnterIp) UpdateEntryKeys();
+                    else if (Entering(view)) UpdateEntryKeys();
                 }
                 else
                 {
