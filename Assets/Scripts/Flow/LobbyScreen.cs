@@ -356,7 +356,7 @@ namespace MiniParty
 
             Session = session;
             Show(View.Matched);
-            int opponentChar = session.IsHost ? clientChar : hostChar;
+            int opponentChar = session.LocalIndex == 0 ? clientChar : hostChar;
             var def = Roster.All[Mathf.Clamp(opponentChar, 0, Roster.All.Length - 1)];
             placeholder.gameObject.SetActive(false);
             var opponent = CharacterView.Create(opponentSlot, def, 150);
@@ -365,7 +365,7 @@ namespace MiniParty
 
             selectedHost = hostChar;
             selectedClient = clientChar;
-            SetStatus($"상대 발견! ({def.Name}) — {(session.IsHost ? "내가 P1" : "내가 P2")}", Palette.Green);
+            SetStatus($"상대 발견! ({def.Name}) — {(session.LocalIndex == 0 ? "내가 P1" : "내가 P2")}", Palette.Green);
             RefreshStatus(0);
         }
 

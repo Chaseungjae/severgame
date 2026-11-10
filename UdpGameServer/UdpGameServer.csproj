@@ -11,8 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- the exact protocol file the Unity client uses -->
-    <Compile Include="..\Assets\Scripts\Net\UdpServer\UdpProtocol.cs" Link="UdpProtocol.cs" />
+    <!-- the exact files the Unity client uses: packet format, reliability, 3조 game numbers / action kinds / yacht hands -->
+    <Compile Include="..\Assets\Scripts\Net\UdpServer\UdpProtocol.cs" Link="Shared\UdpProtocol.cs" />
+    <Compile Include="..\Assets\Scripts\Net\UdpServer\BoardProtocol.cs" Link="Shared\BoardProtocol.cs" />
   </ItemGroup>
 
 </Project>

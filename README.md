@@ -57,19 +57,28 @@
 - 방장이 P1이며 미니게임 추첨·승패·데미지를 결정합니다.
 - 한 PC에서 두 개를 띄워 테스트: 빌드 후 `MiniParty.exe -autohost -autoplay` 와 `MiniParty.exe -autojoin 127.0.0.1 -autoplay`.
 
-## UDP 게임 서버 (`UdpGameServer/`)
+## UDP 게임 서버 (`UdpGameServer/`) — 3조 보드게임
 
-직접 만든 C# UDP 서버를 거쳐 1:1 대전을 합니다. (Unity Relay·Netcode를 쓰지 않는 경로)
+직접 만든 C# UDP 서버가 **방장(판정자)** 입니다. 두 클라이언트는 둘 다 손님이고, 서버가 미니게임 추첨 · 수 검증 · 승패 · 데미지/HP를 정합니다.
 
-- **실행**: `cd UdpGameServer` → `dotnet run -c Release` (또는 배포용 `dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true`)
-  - 옵션: `UdpGameServer.exe [포트] [--quiet] [--loss 20]` — 기본 포트 **7780**, `--loss N`은 받은 패킷 N%를 일부러 버리는 테스트
-- **게임에서 접속**: `[온라인 1:1] → [IP / 서버 연결] → [UDP 서버 접속]` → 서버 PC의 IP 입력. 먼저 온 두 명이 자동으로 짝지어지고, `주소#방이름`으로 특정 방에 모일 수 있어요.
+| 게임 | 서버가 하는 일 (`UdpGameServer/Games/`) |
+|---|---|
+| 사목 | 차례·둘 수 있는 줄 검사, 4목 판정, 가득 차면 추첨, 응답 없는 플레이어는 서버가 대신 둠 |
+| 오델로 | 뒤집기가 되는 자리만 허용, 패스·종료·돌 개수 판정 |
+| 원을 그려봐요 | 시도 순서·점수 범위(0~100) 검사, 최고점 → 합계로 판정, 시간 초과 처리 |
+| 타자 대결 | 단어 진행이 한 칸씩인지, 기록이 서버 시계·사람 속도로 가능한지 검사, 완주 판정 |
+| 야추 다이스 | **주사위를 서버가 굴림** (클라이언트는 요청만), 확정 패가 서버 주사위와 같은지 검사, 족보 판정·동점 재경기 |
+
+- **실행**: `cd UdpGameServer` → `dotnet run -c Release`
+  - 옵션: `[포트] [--damage N] [--game N] [--loss N] [--quiet]` — 기본 포트 **7780**, `--game 11~15`는 한 게임만, `--loss N`은 받은 패킷 N%를 일부러 버리는 테스트
+- **게임에서 접속**: `[온라인 1:1] → [IP / 서버 연결] → [UDP 서버 접속]` → 서버 PC의 IP. 먼저 온 두 명이 짝지어지고 `주소#방이름`으로 방을 지정할 수 있어요.
 - **구조**
-  - `Assets/Scripts/Net/UdpServer/UdpProtocol.cs` — 패킷 규격 + 신뢰성 계층(순번·ACK·재전송·순서 보장). **서버와 Unity가 같은 파일을 컴파일**합니다.
-  - `Assets/Scripts/Net/UdpServer/UdpServerLink.cs` — Unity 클라이언트 (수신 스레드 → 메인 스레드 처리, 하트비트)
-  - `NetSession`의 `Mode.UdpServer` — 기존 온라인 흐름(로비 → 라운드 → 결과)이 그대로 서버를 거쳐 동작. 미니게임 코드는 수정 없음.
-  - 서버는 방 관리 + 중계 + 타임아웃(8초) 담당, 판정은 방에 먼저 들어온 P1(방장) 클라이언트가 합니다.
-- **조 씬 빌드**: `MiniParty > Build > Windows - 3조 씬 (UDP 서버 테스트)` → `Builds/MiniParty_Group3/` (3조 게임만 나옴)
+  - `Assets/Scripts/Net/UdpServer/UdpProtocol.cs` — 패킷 규격 + 신뢰성(순번·ACK·재전송·순서 보장)
+  - `Assets/Scripts/Net/UdpServer/BoardProtocol.cs` — 3조 게임 번호·액션 번호·야추 족보 계산
+  - 위 두 파일은 **서버와 Unity가 같은 파일을 컴파일**합니다. 게임 스크립트의 액션 번호를 바꾸면 여기도 같이 바꾸세요 (어긋나면 접속 시 Unity가 거절).
+  - `UdpServerLink.cs` — Unity 클라이언트, `NetSession`의 `Mode.UdpServer` — 기존 온라인 흐름(로비 → 라운드 → 결과)을 그대로 사용
+  - `UdpGameServer/Room.cs` — 경기 흐름(캐릭터 교환 → StartRound → Barrier/Go → 판정 → RoundResult), `Games/*Rules.cs` — 게임별 규칙
+- **조 씬 빌드**: `MiniParty > Build > Windows - 3조 씬 (UDP 서버 테스트)` → `Builds/MiniParty_Group3/`
 - **자동 테스트**: 서버 실행 후 `MiniParty.exe -udpjoin 127.0.0.1 -autoplay` 를 두 번 실행하면 CPU끼리 서버를 거쳐 대전합니다.
 
 ## 빌드

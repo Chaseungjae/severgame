@@ -42,7 +42,8 @@ namespace MiniParty
         const string Channel = "mp";
 
         public bool IsHost { get; private set; }
-        public int LocalIndex => IsHost ? 0 : 1;
+        /// <summary>0 = P1, 1 = P2. On the UDP game server the server assigns it (and both PCs are guests).</summary>
+        public int LocalIndex => udpIndex >= 0 ? udpIndex : IsHost ? 0 : 1;
         public string Status { get; private set; } = "";
         public bool Disconnected { get; private set; }
 
@@ -52,6 +53,7 @@ namespace MiniParty
 
         ISession session;
         Udp.UdpServerLink udp;
+        int udpIndex = -1;
         bool hooked;
         readonly List<NetMsg> inbox = new List<NetMsg>();
 
@@ -72,7 +74,8 @@ namespace MiniParty
             JoinRoom,     // Relay: join by code
             HostDirect,   // direct IP: wait for a friend on this PC (LAN / VPN / port forwarding)
             JoinDirect,   // direct IP: connect to the host's address
-            UdpServer,    // dedicated UDP game server (UdpGameServer/): arg = "address[:port][#room]"
+            UdpServer,    // dedicated UDP game server (UdpGameServer/): arg = "address[:port][#room]".
+                          // The server is the authority (round picks, rules, results); both PCs are guests.
         }
 
         public const ushort DirectPort = 7777;
@@ -203,18 +206,18 @@ namespace MiniParty
                 switch (udp.State)
                 {
                     case Udp.UdpServerLink.Phase.Matched:
-                        IsHost = udp.Index == 0;
+                        IsHost = false; // the server decides everything
+                        udpIndex = udp.Index;
                         Status = "연결 완료!";
                         return true;
                     case Udp.UdpServerLink.Phase.Rejected:
-                        string why = udp.RejectReason == "VERSION" ? "서버와 게임 버전이 달라요" : udp.RejectReason == "FULL" ? "그 방은 이미 꽉 찼어요" : "서버가 접속을 거절했어요";
+                        string why = udp.RejectReason == "REGISTRY" ? "미니게임 목록이 서버와 달라요 (콘솔 확인)" : udp.RejectReason == "VERSION" ? "서버와 게임 버전이 달라요" : udp.RejectReason == "FULL" ? "그 방은 이미 꽉 찼어요" : "서버가 접속을 거절했어요";
                         await LeaveAsync();
                         return Fail(why);
                     case Udp.UdpServerLink.Phase.Lost:
                         await LeaveAsync();
                         return Fail("서버와 연결이 끊겼어요");
                     case Udp.UdpServerLink.Phase.Waiting:
-                        IsHost = udp.Index == 0;
                         Status = $"서버 방 {udp.Room} 입장 — 상대를 기다리는 중...";
                         break;
                     default:

@@ -53,8 +53,36 @@ namespace MiniParty.Udp
             pump = go.AddComponent<UdpPump>();
             pump.Link = this;
 
+            if (!CheckRegistry(out string drift))
+            {
+                State = Phase.Rejected;
+                RejectReason = "REGISTRY";
+                Debug.LogError($"[UDP] 미니게임 목록이 서버 규격(BoardProtocol.cs)과 달라요: {drift}");
+                return;
+            }
             channel.SendReliable($"HELLO|{UdpWire.Version}|{room}", Now);
             Debug.Log($"[UDP] 서버 {Server} 에 접속 요청 (방: {(room.Length > 0 ? room : "빠른 매칭")})");
+        }
+
+        /// <summary>The server refers to 3조 games by registry index: make sure they still point at the same games.</summary>
+        static bool CheckRegistry(out string drift)
+        {
+            var expected = new (int Index, Type Type)[]
+            {
+                (Board3.ConnectFour, typeof(ConnectFourGame)), (Board3.Othello, typeof(OthelloGame)),
+                (Board3.Circle, typeof(CircleGame)), (Board3.Typing, typeof(TypingGame)), (Board3.Yacht, typeof(YachtGame)),
+            };
+            foreach (var (index, type) in expected)
+            {
+                var games = MiniGameRegistry.Games;
+                if (index >= games.Length || games[index].Type != type)
+                {
+                    drift = $"#{index} 은(는) {type.Name} 이어야 해요";
+                    return false;
+                }
+            }
+            drift = null;
+            return true;
         }
 
         static IPAddress Resolve(string host)
