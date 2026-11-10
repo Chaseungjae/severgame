@@ -37,7 +37,27 @@ namespace MiniParty.EditorTools
 ";
 
         [MenuItem("MiniParty/Build/Windows (친구에게 보낼 실행 파일)")]
-        public static void BuildWindows()
+        public static void BuildWindows() => Build("Assets/Scenes/SampleScene.unity", OutputDir, Readme);
+
+        /// <summary>3조 test build: only the Group3_Board minigames, for the UDP game server (UdpGameServer/).</summary>
+        [MenuItem("MiniParty/Build/Windows - 3조 씬 (UDP 서버 테스트)")]
+        public static void BuildGroup3() => Build("Assets/Scenes/Groups/Group3_Board.unity", "Builds/MiniParty_Group3", Group3Readme);
+
+        const string Group3Readme =
+@"MINI PARTY BATTLE — 3조 (보드·턴제) UDP 서버 테스트 빌드
+
+이 빌드는 3조 미니게임(사목, 오델로, 원을 그려봐요, 타자 대결, 야추 다이스)만 나옵니다.
+
+1. 서버를 켤 PC에서 Server 폴더의 UdpGameServer.exe 실행
+     * 처음 실행 때 Windows 방화벽 창이 뜨면 '액세스 허용'
+     * 서버 창에 나온 주소(예: 192.168.0.5)를 두 사람에게 알려주기
+2. 두 사람 다 MiniParty.exe 실행 → [온라인 1:1] → [IP / 서버 연결] → [UDP 서버 접속]
+3. 서버 주소 입력 → [접속]. 먼저 들어온 두 명이 자동으로 짝지어집니다.
+     * 여러 팀이 한 서버를 쓸 땐 주소#방이름 (예: 192.168.0.5#TEAM3) 으로 같은 방에 모이기
+4. 먼저 들어온 사람이 P1(방장)이고 미니게임 추첨·승패 판정을 맡습니다. 서버는 둘 사이 메시지를 중계합니다.
+";
+
+        static void Build(string scene, string outputDir, string readme)
         {
             PlayerSettings.productName = "MiniParty Battle";
             PlayerSettings.companyName = "MiniParty";
@@ -49,11 +69,11 @@ namespace MiniParty.EditorTools
             PlayerSettings.visibleInBackground = true;
             PlayerSettings.forceSingleInstance = false;
 
-            if (Directory.Exists(OutputDir)) Directory.Delete(OutputDir, true);
+            if (Directory.Exists(outputDir)) Directory.Delete(outputDir, true);
             var options = new BuildPlayerOptions
             {
-                scenes = new[] { "Assets/Scenes/SampleScene.unity" },
-                locationPathName = Path.Combine(OutputDir, ExeName),
+                scenes = new[] { scene },
+                locationPathName = Path.Combine(outputDir, ExeName),
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.None,
             };
@@ -61,9 +81,9 @@ namespace MiniParty.EditorTools
             if (report.summary.result == BuildResult.Succeeded)
             {
                 // not needed by players
-                foreach (var dir in Directory.GetDirectories(OutputDir, "*DoNotShip*")) Directory.Delete(dir, true);
-                File.WriteAllText(Path.Combine(OutputDir, "플레이 방법.txt"), Readme, System.Text.Encoding.UTF8);
-                Debug.Log($"[Build] OK — {Path.GetFullPath(OutputDir)} ({report.summary.totalSize / (1024 * 1024)} MB)");
+                foreach (var dir in Directory.GetDirectories(outputDir, "*DoNotShip*")) Directory.Delete(dir, true);
+                File.WriteAllText(Path.Combine(outputDir, "플레이 방법.txt"), readme, System.Text.Encoding.UTF8);
+                Debug.Log($"[Build] OK — {Path.GetFullPath(outputDir)} ({report.summary.totalSize / (1024 * 1024)} MB)");
             }
             else
             {

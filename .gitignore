@@ -56,3 +56,7 @@ desktop.ini
 # Unity crash recovery scenes
 Assets/_Recovery/
 Assets/_Recovery.meta
+
+# dedicated UDP game server build output
+UdpGameServer/bin/
+UdpGameServer/obj/

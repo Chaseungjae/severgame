@@ -12,7 +12,8 @@ namespace MiniParty
     /// Step 1: character select. One PC is always one human player. Two modes:
     ///  - CPU 대전: you vs the CPU (P1 can also be set to CPU to watch a CPU vs CPU test match).
     ///  - Online: pick your character, then play a friend:
-    ///      빠른 매칭 (any open room) · 방 만들기 → share the code · 코드로 참가 · IP 직접 연결 (LAN / VPN).
+    ///      빠른 매칭 (any open room) · 방 만들기 → share the code · 코드로 참가 · IP 직접 연결 (LAN / VPN)
+    ///      · UDP 서버 접속 (dedicated UdpGameServer: both players type the server's address).
     /// </summary>
     public class LobbyScreen : MonoBehaviour
     {
@@ -21,7 +22,7 @@ namespace MiniParty
         /// <summary>Set when an online match was found. Null for local play.</summary>
         public NetSession Session { get; private set; }
 
-        enum View { Menu, EnterCode, IpMenu, EnterIp, Busy, Matched }
+        enum View { Menu, EnterCode, IpMenu, EnterIp, EnterServer, Busy, Matched }
 
         readonly int[] selection = { 0, 1 };
         readonly bool[] ready = new bool[2];
@@ -43,6 +44,7 @@ namespace MiniParty
         NetSession pending;
         int selectedHost, selectedClient;
         bool hooked;
+        const string ServerPref = "MiniParty.UdpServer";
 
         public static LobbyScreen Create(Transform parent)
         {
@@ -130,14 +132,18 @@ namespace MiniParty
             AddButton(View.Menu, "빠른 매칭", new Vector2(-150, -170), green, () => StartConnect(NetSession.Mode.QuickMatch, null));
             AddButton(View.Menu, "방 만들기 (초대코드)", new Vector2(150, -170), blue, () => StartConnect(NetSession.Mode.CreateRoom, null));
             AddButton(View.Menu, "코드로 참가", new Vector2(-150, -245), Palette.PanelLight, () => Show(View.EnterCode));
-            AddButton(View.Menu, "IP 직접 연결", new Vector2(150, -245), Palette.PanelLight, () => Show(View.IpMenu));
+            AddButton(View.Menu, "IP / 서버 연결", new Vector2(150, -245), Palette.PanelLight, () => Show(View.IpMenu));
 
             AddButton(View.EnterCode, "참가하기", new Vector2(-150, -210), green, SubmitEntry);
             AddButton(View.EnterCode, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.Menu));
 
             AddButton(View.IpMenu, "내가 방 열기", new Vector2(-150, -170), blue, () => StartConnect(NetSession.Mode.HostDirect, null));
             AddButton(View.IpMenu, "IP로 참가", new Vector2(150, -170), green, () => Show(View.EnterIp));
-            AddButton(View.IpMenu, "뒤로", new Vector2(0, -245), Palette.PanelLight, () => Show(View.Menu));
+            AddButton(View.IpMenu, "UDP 서버 접속", new Vector2(-150, -245), Palette.Hex("#A66CFF"), () => Show(View.EnterServer));
+            AddButton(View.IpMenu, "뒤로", new Vector2(150, -245), Palette.PanelLight, () => Show(View.Menu));
+
+            AddButton(View.EnterServer, "접속", new Vector2(-150, -210), green, SubmitEntry);
+            AddButton(View.EnterServer, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.IpMenu));
 
             AddButton(View.EnterIp, "접속", new Vector2(-150, -210), green, SubmitEntry);
             AddButton(View.EnterIp, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.IpMenu));
@@ -160,7 +166,7 @@ namespace MiniParty
                 foreach (var go in pair.Value) go.SetActive(pair.Key == v);
 
             entry.Clear();
-            bool entering = v == View.EnterCode || v == View.EnterIp;
+            bool entering = v == View.EnterCode || v == View.EnterIp || v == View.EnterServer;
             field.gameObject.SetActive(entering);
             copyButton.SetActive(false);
             switch (v)
@@ -177,6 +183,10 @@ namespace MiniParty
                 case View.EnterIp:
                     SetStatus("방 연 친구의 IP를 입력하세요 (예: 192.168.0.5)", Palette.Muted);
                     break;
+                case View.EnterServer:
+                    SetStatus("UDP 게임 서버 주소를 입력하세요 (예: 192.168.0.5)\n먼저 온 두 명이 자동으로 짝지어져요 · 방 지정: 주소#방이름", Palette.Muted);
+                    entry.Append(PlayerPrefs.GetString(ServerPref, ""));
+                    break;
             }
             RefreshEntry();
             RefreshStatus(0);
@@ -190,7 +200,7 @@ namespace MiniParty
 
         void RefreshEntry()
         {
-            if (view == View.EnterCode || view == View.EnterIp)
+            if (view == View.EnterCode || view == View.EnterIp || view == View.EnterServer)
                 fieldText.text = entry + "<color=#9AA3C7>|</color>";
         }
 
@@ -219,7 +229,7 @@ namespace MiniParty
 
         void OnChar(char c)
         {
-            if (view != View.EnterCode && view != View.EnterIp) return;
+            if (view != View.EnterCode && view != View.EnterIp && view != View.EnterServer) return;
             if (!Accept(c)) return;
             if (entry.Length >= (view == View.EnterCode ? 10 : 40)) return;
             entry.Append(view == View.EnterCode ? char.ToUpperInvariant(c) : c);
@@ -230,6 +240,7 @@ namespace MiniParty
         {
             if (char.IsControl(c) || char.IsWhiteSpace(c)) return false;
             if (view == View.EnterCode) return c < 128 && char.IsLetterOrDigit(c);
+            if (view == View.EnterServer) return c < 128 && (char.IsLetterOrDigit(c) || c == '.' || c == ':' || c == '-' || c == '#' || c == '_');
             return c < 128 && (char.IsLetterOrDigit(c) || c == '.' || c == ':' || c == '-');
         }
 
@@ -249,13 +260,19 @@ namespace MiniParty
                 RefreshEntry();
             }
             if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) SubmitEntry();
-            if (kb.escapeKey.wasPressedThisFrame) Show(view == View.EnterIp ? View.IpMenu : View.Menu);
+            if (kb.escapeKey.wasPressedThisFrame) Show(view == View.EnterIp || view == View.EnterServer ? View.IpMenu : View.Menu);
         }
 
         void SubmitEntry()
         {
             string text = entry.ToString().Trim();
             if (text.Length == 0) return;
+            if (view == View.EnterServer)
+            {
+                PlayerPrefs.SetString(ServerPref, text);
+                StartConnect(NetSession.Mode.UdpServer, text);
+                return;
+            }
             StartConnect(view == View.EnterCode ? NetSession.Mode.JoinRoom : NetSession.Mode.JoinDirect, text);
         }
 
@@ -269,7 +286,7 @@ namespace MiniParty
 
         IEnumerator ConnectRoutine(NetSession.Mode mode, string arg)
         {
-            var back = view == View.EnterIp || view == View.IpMenu ? View.IpMenu : View.Menu;
+            var back = view == View.EnterIp || view == View.IpMenu || view == View.EnterServer ? View.IpMenu : View.Menu;
             Show(View.Busy);
             var session = new NetSession();
             pending = session;
@@ -441,6 +458,12 @@ namespace MiniParty
                 SetMode(true);
                 StartConnect(NetSession.Mode.HostDirect, null);
             }
+            else if (DevArgs.Get("-udpjoin") is string server)
+            {
+                SetMode(true);
+                if (DevArgs.Has("-p2look")) { selection[0] = 1; RebuildPreview(0); }
+                StartConnect(NetSession.Mode.UdpServer, server);
+            }
             else if (DevArgs.Get("-autojoin") is string ip)
             {
                 SetMode(true);
@@ -459,7 +482,7 @@ namespace MiniParty
                         if (Controls.Left(0) || Controls.Left(1)) Change(0, -1);
                         if (Controls.Right(0) || Controls.Right(1)) Change(0, 1);
                     }
-                    else if (view == View.EnterCode || view == View.EnterIp) UpdateEntryKeys();
+                    else if (view == View.EnterCode || view == View.EnterIp || view == View.EnterServer) UpdateEntryKeys();
                 }
                 else
                 {

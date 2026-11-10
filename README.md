@@ -57,6 +57,21 @@
 - 방장이 P1이며 미니게임 추첨·승패·데미지를 결정합니다.
 - 한 PC에서 두 개를 띄워 테스트: 빌드 후 `MiniParty.exe -autohost -autoplay` 와 `MiniParty.exe -autojoin 127.0.0.1 -autoplay`.
 
+## UDP 게임 서버 (`UdpGameServer/`)
+
+직접 만든 C# UDP 서버를 거쳐 1:1 대전을 합니다. (Unity Relay·Netcode를 쓰지 않는 경로)
+
+- **실행**: `cd UdpGameServer` → `dotnet run -c Release` (또는 배포용 `dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true`)
+  - 옵션: `UdpGameServer.exe [포트] [--quiet] [--loss 20]` — 기본 포트 **7780**, `--loss N`은 받은 패킷 N%를 일부러 버리는 테스트
+- **게임에서 접속**: `[온라인 1:1] → [IP / 서버 연결] → [UDP 서버 접속]` → 서버 PC의 IP 입력. 먼저 온 두 명이 자동으로 짝지어지고, `주소#방이름`으로 특정 방에 모일 수 있어요.
+- **구조**
+  - `Assets/Scripts/Net/UdpServer/UdpProtocol.cs` — 패킷 규격 + 신뢰성 계층(순번·ACK·재전송·순서 보장). **서버와 Unity가 같은 파일을 컴파일**합니다.
+  - `Assets/Scripts/Net/UdpServer/UdpServerLink.cs` — Unity 클라이언트 (수신 스레드 → 메인 스레드 처리, 하트비트)
+  - `NetSession`의 `Mode.UdpServer` — 기존 온라인 흐름(로비 → 라운드 → 결과)이 그대로 서버를 거쳐 동작. 미니게임 코드는 수정 없음.
+  - 서버는 방 관리 + 중계 + 타임아웃(8초) 담당, 판정은 방에 먼저 들어온 P1(방장) 클라이언트가 합니다.
+- **조 씬 빌드**: `MiniParty > Build > Windows - 3조 씬 (UDP 서버 테스트)` → `Builds/MiniParty_Group3/` (3조 게임만 나옴)
+- **자동 테스트**: 서버 실행 후 `MiniParty.exe -udpjoin 127.0.0.1 -autoplay` 를 두 번 실행하면 CPU끼리 서버를 거쳐 대전합니다.
+
 ## 빌드
 
 `MiniParty > Build > Windows` → `Builds/MiniParty/` (zip으로 묶어 배포). `Builds/`는 git에 올리지 않습니다.

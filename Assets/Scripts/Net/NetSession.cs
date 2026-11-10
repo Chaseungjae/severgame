@@ -51,6 +51,7 @@ namespace MiniParty
         public MiniGameBase ActiveGame;
 
         ISession session;
+        Udp.UdpServerLink udp;
         bool hooked;
         readonly List<NetMsg> inbox = new List<NetMsg>();
 
@@ -71,6 +72,7 @@ namespace MiniParty
             JoinRoom,     // Relay: join by code
             HostDirect,   // direct IP: wait for a friend on this PC (LAN / VPN / port forwarding)
             JoinDirect,   // direct IP: connect to the host's address
+            UdpServer,    // dedicated UDP game server (UdpGameServer/): arg = "address[:port][#room]"
         }
 
         public const ushort DirectPort = 7777;
@@ -88,6 +90,9 @@ namespace MiniParty
 
                 switch (mode)
                 {
+                    case Mode.UdpServer:
+                        return await ConnectUdpServer(arg, ct);
+
                     case Mode.HostDirect:
                         Transport.SetConnectionData(true, "127.0.0.1", DirectPort, "0.0.0.0");
                         IsHost = true;
@@ -163,6 +168,82 @@ namespace MiniParty
                 await LeaveAsync();
                 return Fail(FriendlyError(e));
             }
+        }
+
+        // ---------- dedicated UDP game server ----------
+
+        async Task<bool> ConnectUdpServer(string arg, CancellationToken ct)
+        {
+            string text = (arg ?? "").Trim(), room = "";
+            int hash = text.IndexOf('#');
+            if (hash >= 0)
+            {
+                room = text.Substring(hash + 1).Trim().ToUpperInvariant();
+                text = text.Substring(0, hash).Trim();
+            }
+            int port = Udp.UdpWire.DefaultPort;
+            int colon = text.LastIndexOf(':');
+            if (colon > 0 && int.TryParse(text.Substring(colon + 1), out int parsed))
+            {
+                port = parsed;
+                text = text.Substring(0, colon);
+            }
+            if (text.Length == 0) return Fail("서버 주소를 입력해 주세요");
+
+            udp = new Udp.UdpServerLink(text, port, room);
+            udp.OnBody += OnUdpBody;
+            float started = Time.realtimeSinceStartup;
+            while (true)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    await LeaveAsync();
+                    return false;
+                }
+                switch (udp.State)
+                {
+                    case Udp.UdpServerLink.Phase.Matched:
+                        IsHost = udp.Index == 0;
+                        Status = "연결 완료!";
+                        return true;
+                    case Udp.UdpServerLink.Phase.Rejected:
+                        string why = udp.RejectReason == "VERSION" ? "서버와 게임 버전이 달라요" : udp.RejectReason == "FULL" ? "그 방은 이미 꽉 찼어요" : "서버가 접속을 거절했어요";
+                        await LeaveAsync();
+                        return Fail(why);
+                    case Udp.UdpServerLink.Phase.Lost:
+                        await LeaveAsync();
+                        return Fail("서버와 연결이 끊겼어요");
+                    case Udp.UdpServerLink.Phase.Waiting:
+                        IsHost = udp.Index == 0;
+                        Status = $"서버 방 {udp.Room} 입장 — 상대를 기다리는 중...";
+                        break;
+                    default:
+                        if (Time.realtimeSinceStartup - started > 5f)
+                        {
+                            await LeaveAsync();
+                            return Fail($"서버({text}:{port}) 응답이 없어요\n서버 실행 여부와 주소를 확인해 주세요");
+                        }
+                        Status = $"서버 {text}:{port} 에 접속 중...";
+                        break;
+                }
+                await Task.Delay(50);
+            }
+        }
+
+        void OnUdpBody(string body)
+        {
+            if (body == "PEER_LEFT")
+            {
+                Disconnected = true;
+                return;
+            }
+            var f = body.Split('|');
+            if (f.Length != 7 || f[0] != "MSG") return;
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            if (!byte.TryParse(f[1], out byte type) || !int.TryParse(f[2], out int a) || !int.TryParse(f[3], out int b)
+                || !int.TryParse(f[4], out int c) || !int.TryParse(f[5], out int d)
+                || !float.TryParse(f[6], System.Globalization.NumberStyles.Float, inv, out float fl)) return;
+            Deliver(new NetMsg { Type = (MsgType)type, A = a, B = b, C = c, D = d, F = fl });
         }
 
         static UnityTransport Transport => (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
@@ -278,8 +359,11 @@ namespace MiniParty
             reader.ReadValueSafe(out int c);
             reader.ReadValueSafe(out int d);
             reader.ReadValueSafe(out float f);
-            var msg = new NetMsg { Type = (MsgType)type, A = a, B = b, C = c, D = d, F = f };
+            Deliver(new NetMsg { Type = (MsgType)type, A = a, B = b, C = c, D = d, F = f });
+        }
 
+        void Deliver(NetMsg msg)
+        {
             if (msg.Type == MsgType.Action)
             {
                 if (msg.D == CurrentRound && ActiveGame != null)
@@ -291,6 +375,13 @@ namespace MiniParty
 
         public void Send(NetMsg msg)
         {
+            if (udp != null)
+            {
+                if (!Disconnected)
+                    udp.Send(string.Format(System.Globalization.CultureInfo.InvariantCulture, "MSG|{0}|{1}|{2}|{3}|{4}|{5:R}",
+                        (byte)msg.Type, msg.A, msg.B, msg.C, msg.D, msg.F));
+                return;
+            }
             var nm = NetworkManager.Singleton;
             if (Disconnected || nm == null || !nm.IsListening || nm.CustomMessagingManager == null) return;
 
@@ -363,6 +454,13 @@ namespace MiniParty
 
         public async Task LeaveAsync()
         {
+            if (udp != null)
+            {
+                udp.OnBody -= OnUdpBody;
+                udp.Close();
+                udp = null;
+                return;
+            }
             var nm = NetworkManager.Singleton;
             if (nm != null)
             {
