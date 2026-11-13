@@ -24,9 +24,9 @@ namespace MiniParty
         const float ArenaW = 1400f, ArenaH = 470f;
         const float BallSize = 54f;
 
-        const int ActRoundStart = 1; // system: A = round number
-        const int ActAnswer = 2;     // player: A = round * 1000 + value, F = lock time
-        const int ActRoundResult = 3; // system: A = winner
+        const int ActRoundStart = BrainProtocol.BallCount.RoundStart;
+        const int ActAnswer = BrainProtocol.BallCount.Answer;
+        const int ActRoundResult = BrainProtocol.BallCount.RoundResult;
 
         static readonly (string Name, Color Color)[] BallColors =
         {
@@ -322,11 +322,13 @@ namespace MiniParty
                 pk.Value.text = pk.Current.ToString();
                 Sfx.Tap();
                 StartCoroutine(Tween.Pop(pk.Value.transform, 1.15f, 0.1f));
+                ReportInput(BrainProtocol.BallCount.InputDigit, p, pk.Current);
             }
             else if (Controls.Backspace && pk.Current >= 0)
             {
                 pk.Current = pk.Current >= 10 ? pk.Current / 10 : -1;
                 pk.Value.text = pk.Current < 0 ? "_" : pk.Current.ToString();
+                ReportInput(BrainProtocol.BallCount.InputErase, p, pk.Current);
             }
             if (InConfirm(p) && pk.Current >= 0) Lock(p);
         }

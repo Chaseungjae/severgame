@@ -8,7 +8,13 @@ namespace MiniParty
     /// </summary>
     public static class Controls
     {
-        public static bool Pressed(Key k) => Keyboard.current != null && Keyboard.current[k].wasPressedThisFrame;
+        /// <summary>
+        /// 한 PC 에 창 두 개(에디터 + 빌드 등)를 띄워 온라인 테스트할 때, 포커스 없는 창이 남의 키 입력을 받아
+        /// 자기 플레이어의 입력으로 처리하지 않게 한다.
+        /// </summary>
+        static bool Focused => UnityEngine.Application.isFocused;
+
+        public static bool Pressed(Key k) => Focused && Keyboard.current != null && Keyboard.current[k].wasPressedThisFrame;
 
         public static bool Left(int p) => Pressed(p == 0 ? Key.A : Key.LeftArrow);
         public static bool Right(int p) => Pressed(p == 0 ? Key.D : Key.RightArrow);
@@ -17,7 +23,7 @@ namespace MiniParty
         public static bool Confirm(int p) => p == 0 ? Pressed(Key.Space) : Pressed(Key.Enter) || Pressed(Key.NumpadEnter);
         public static bool AnyConfirm => Confirm(0) || Confirm(1);
 
-        public static bool Held(Key k) => Keyboard.current != null && Keyboard.current[k].isPressed;
+        public static bool Held(Key k) => Focused && Keyboard.current != null && Keyboard.current[k].isPressed;
         public static bool UpHeld(int p) => Held(p == 0 ? Key.W : Key.UpArrow);
         public static bool DownHeld(int p) => Held(p == 0 ? Key.S : Key.DownArrow);
         public static bool LeftHeld(int p) => Held(p == 0 ? Key.A : Key.LeftArrow);
@@ -55,7 +61,7 @@ namespace MiniParty
         public static bool Click(int p)
         {
             var m = Mouse.current;
-            if (m == null) return false;
+            if (m == null || !Focused) return false;
             return p == 0 ? m.leftButton.wasPressedThisFrame : m.rightButton.wasPressedThisFrame;
         }
     }

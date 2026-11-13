@@ -4,8 +4,8 @@ namespace MiniParty
 {
     /// <summary>
     /// Command-line switches for testing online play with two copies of the game on one PC:
-    ///   -autohost            open a direct-IP room immediately
-    ///   -autojoin 127.0.0.1  join a direct-IP room immediately
+    ///   -server 127.0.0.1    connect to that UDP game server as soon as the lobby opens
+    ///   -p2                  start on the second character (so the two windows look different)
     ///   -autoplay            the local player is played by the CPU (online too)
     /// </summary>
     public static class DevArgs

@@ -17,9 +17,9 @@ namespace MiniParty
 
         const int WinsNeeded = 2;
         const float Target = 10f, HideAfter = 5f, GiveUp = 15f;
-        const int ActRoundStart = 1; // system: A = round
-        const int ActStop = 2;       // player: A = round, F = stopped time
-        const int ActRoundResult = 3; // system: A = winner
+        const int ActRoundStart = BrainProtocol.TenSeconds.RoundStart;
+        const int ActStop = BrainProtocol.TenSeconds.Stop;
+        const int ActRoundResult = BrainProtocol.TenSeconds.RoundResult;
 
         class Lane
         {

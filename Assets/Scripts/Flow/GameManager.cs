@@ -8,7 +8,8 @@ namespace MiniParty
 {
     /// <summary>
     /// Entry point. Lobby → [MiniGame Select → Play → Result &amp; Punish → Survival Check] loop → Final Game Over.
-    /// Works for local play (one PC) and online 1v1 (host = authority, see <see cref="NetSession"/>).
+    /// Works for local play (one PC) and online 1v1, where a dedicated UDP server picks the round, validates input
+    /// and decides the winner and damage (see <see cref="UdpNetSession"/>).
     /// Everything is built at runtime; just put this component on an empty GameObject in the scene.
     /// </summary>
     public class GameManager : MonoBehaviour
@@ -23,9 +24,6 @@ namespace MiniParty
         [SerializeField] bool p1Cpu;
         [SerializeField] bool p2Cpu;
 
-        // barrier tags (combined with the round number)
-        const int BarrierReady = 1, BarrierNext = 2;
-
         RectTransform gameLayer, stage, hudLayer, overlay;
         BlurBackdrop blur;
         ScreenFader fader;
@@ -38,7 +36,6 @@ namespace MiniParty
             var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             MiniGameRegistry.ActiveGroup = scene.StartsWith("Group") && scene.Length > 5 && char.IsDigit(scene[5]) ? scene[5] - '0' : 0;
             EnsureEventSystem();
-            NetSession.EnsureNetworkManager();
             BuildCanvas();
         }
 
@@ -93,62 +90,59 @@ namespace MiniParty
                 var hud = HpHud.Create(hudLayer, players);
                 yield return PlayMatch(players, hud, net);
 
-                if (net != null)
-                {
-                    var leave = net.LeaveAsync();
-                    while (!leave.IsCompleted) yield return null;
-                }
+                net?.Leave();
                 Destroy(hud.gameObject);
             }
         }
 
-        IEnumerator PlayMatch(PlayerData[] players, HpHud hud, NetSession net)
+        IEnumerator PlayMatch(PlayerData[] players, HpHud hud, UdpNetSession net)
         {
-            bool Lost() => net != null && net.Disconnected;
-            bool authority = net == null || net.IsHost;
+            bool online = net != null;
+            bool Lost() => online && net.Disconnected;
             // CPU vs CPU = watch/test mode (log lines); every minigame is played once before any repeats
-            bool cpuTest = net == null && players[0].IsCpu && players[1].IsCpu;
+            bool cpuTest = !online && players[0].IsCpu && players[1].IsCpu;
             var deck = new System.Collections.Generic.List<int>();
 
             for (int round = 1; ; round++)
             {
                 hud.SetRound(round);
 
-                // 2. MiniGame Select (host picks, client follows)
-                int gameIndex = 0, seed = 0;
-                if (authority)
+                // 2. MiniGame Select — online the server picks it and tells both PCs
+                int gameIndex, seed;
+                if (online)
+                {
+                    NetMsg start = default;
+                    yield return net.WaitFor(MsgType.StartRound, m => start = m);
+                    if (Lost()) { yield return Abort(); yield break; }
+                    round = start.A;
+                    gameIndex = start.B;
+                    seed = start.C;
+                    net.ServerJudges = start.D == 1;
+                }
+                else
                 {
                     if (deck.Count == 0) deck = MiniGameRegistry.ShuffledDeck();
                     gameIndex = deck[0];
                     deck.RemoveAt(0);
                     seed = Random.Range(1, int.MaxValue);
-                    net?.Send(new NetMsg { Type = MsgType.StartRound, A = round, B = gameIndex, C = seed });
-                }
-                else
-                {
-                    NetMsg start = default;
-                    yield return net.WaitFor(MsgType.StartRound, m => start = m);
-                    if (Lost()) { yield return Abort(); yield break; }
-                    gameIndex = start.B;
-                    seed = start.C;
                 }
 
                 var game = MiniGameRegistry.Create(gameIndex, gameLayer);
                 game.Setup(players, seed, net);
                 if (cpuTest) Debug.Log($"[CPU 테스트] ROUND {round}: {game.Title} (HP {players[0].Hp} : {players[1].Hp}, 덱 남은 {deck.Count})");
-                if (net != null)
+                if (online)
                 {
                     net.CurrentRound = round;
                     net.ActiveGame = game;
                 }
 
-                var intro = RoundIntro.Create(overlay, round, game, net != null);
+                var intro = RoundIntro.Create(overlay, round, game, online);
                 yield return fader.FadeTo(0f, 0.4f);
                 yield return intro.ShowCard();
-                if (net != null)
+                if (online)
                 {
                     intro.SetWaiting();
-                    yield return net.Barrier(round * 10 + BarrierReady);
+                    yield return net.Barrier(Barriers.Tag(round, Barriers.Ready));
                     if (Lost()) { yield return Abort(); yield break; }
                 }
                 yield return intro.Countdown();
@@ -158,14 +152,9 @@ namespace MiniParty
                 if (Lost()) { yield return Abort(); yield break; }
                 yield return new WaitForSeconds(1.0f);
 
-                // 4. Result & Punish (over a blurred snapshot of the finished minigame)
+                // 4. Result & Punish (over a blurred snapshot) — online the server decides winner and damage
                 int winner = game.WinnerIndex, damage;
-                if (authority)
-                {
-                    damage = cpuTest || testDamageOne ? 1 : Random.Range(minDamage, maxDamage + 1);
-                    net?.Send(new NetMsg { Type = MsgType.RoundResult, A = winner, B = damage });
-                }
-                else
+                if (online)
                 {
                     NetMsg result = default;
                     yield return net.WaitFor(MsgType.RoundResult, m => result = m);
@@ -173,10 +162,11 @@ namespace MiniParty
                     winner = result.A;
                     damage = result.B;
                 }
+                else damage = cpuTest || testDamageOne ? 1 : Random.Range(minDamage, maxDamage + 1);
 
                 yield return blur.CaptureAndShow(0.45f);
                 game.gameObject.SetActive(false);
-                if (net != null) net.ActiveGame = null;
+                if (online) net.ActiveGame = null;
                 var podium = new PodiumSequence(stage, hud, players, this);
                 yield return podium.Run(winner, game, damage);
                 Destroy(game.gameObject);
@@ -184,16 +174,16 @@ namespace MiniParty
                 // 5. Survival Check
                 bool over = podium.LoserDead;
                 if (over) // 6. Final Game Over
-                    yield return podium.GameOver(net == null ? players[0].IsCpu && players[1].IsCpu : players[net.LocalIndex].IsCpu);
+                    yield return podium.GameOver(online ? players[net.LocalIndex].IsCpu : players[0].IsCpu && players[1].IsCpu);
 
                 yield return fader.FadeTo(1f, 0.45f);
                 podium.Cleanup();
                 blur.Clear();
                 if (over) yield break;
 
-                if (net != null)
+                if (online)
                 {
-                    yield return net.Barrier(round * 10 + BarrierNext);
+                    yield return net.Barrier(Barriers.Tag(round, Barriers.Next));
                     if (Lost()) { yield return Abort(); yield break; }
                 }
                 yield return new WaitForSeconds(0.2f);

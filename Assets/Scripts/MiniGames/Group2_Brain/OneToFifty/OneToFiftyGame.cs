@@ -209,15 +209,13 @@ namespace MiniParty
             TryPress(b, index);
         }
 
-        const int ActPress = 1, ActWrong = 2;
-
-        /// <summary>Local player's press: validated here, then broadcast as an action.</summary>
+        /// <summary>Local player's press: broadcast as an action (A = cell, F = the number on it, which the server checks).</summary>
         void TryPress(Board b, int i)
         {
             if (!Running || b.Done || Time.time < b.LockUntil) return;
             int v = b.Values[i];
             if (v == 0) return;
-            Emit(v == b.Next ? ActPress : ActWrong, b.Player, i);
+            Emit(v == b.Next ? BrainProtocol.OneToFifty.Press : BrainProtocol.OneToFifty.Wrong, b.Player, i, v);
         }
 
         protected override void OnAction(GameAction act)
@@ -226,13 +224,13 @@ namespace MiniParty
             var b = boards[act.Player];
             int i = act.A;
 
-            if (act.Kind == ActWrong)
+            if (act.Kind == BrainProtocol.OneToFifty.Wrong)
             {
                 b.LockUntil = Time.time + WrongLock;
                 StartCoroutine(WrongFlash(b, i));
                 return;
             }
-            if (act.Kind != ActPress || b.Done || b.Values[i] != b.Next) return;
+            if (act.Kind != BrainProtocol.OneToFifty.Press || b.Done || b.Values[i] != b.Next) return;
 
             b.Cursor = i;
             UpdateCursor(b);
@@ -241,7 +239,7 @@ namespace MiniParty
             RefreshCell(b, i);
             StartCoroutine(Tween.Pop(b.Cells[i].transform, 0.8f, 0.18f));
 
-            if (b.Next > 50)
+            if (b.Next > BrainProtocol.OneToFifty.Goal)
             {
                 b.Done = true;
                 DeclareWinner(b.Player); // authority only; first finisher it sees wins

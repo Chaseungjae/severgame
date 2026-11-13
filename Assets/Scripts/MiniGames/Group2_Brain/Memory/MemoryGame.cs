@@ -21,7 +21,7 @@ namespace MiniParty
         const int Lives = 2;
         const int StartLength = 3;
         const float InputTime = 12f;
-        const int ActClear = 1, ActFail = 2;
+        const int ActClear = BrainProtocol.Memory.Clear, ActFail = BrainProtocol.Memory.Fail;
 
         class Lane
         {
@@ -175,6 +175,7 @@ namespace MiniParty
             StartCoroutine(Tween.Pop(l.Keys[digit - 1].transform, 0.85f, 0.12f));
             int pos = l.Typed.Length;
             l.Typed.Append(digit);
+            ReportInput(BrainProtocol.Memory.InputKey, p, digit, pos + 1);
             l.Entry.text = string.Join(" ", l.Typed.ToString().ToCharArray());
             int expected = l.Sequence[l.Length - 1 - pos];
             if (digit != expected) Resolve(p, false);

@@ -34,6 +34,10 @@
 ExportedObj/
 .consulo/
 
+# UDP 게임 서버(.NET 콘솔): 위의 *.csproj 는 Unity 가 만드는 파일용이라 서버 프로젝트 파일은 예외로 올린다
+!UDPServer/**/*.csproj
+UDPServer/**/bin/Release/
+
 # Crash reports / misc
 sysinfo.txt
 crashlytics-build.properties

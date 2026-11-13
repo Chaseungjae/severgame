@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- 패킷 규격은 Unity 클라이언트와 같은 파일을 컴파일한다 (복사본을 두면 규격이 어긋난다) -->
+  <ItemGroup>
+    <Compile Include="..\..\Assets\Scripts\Net\Shared\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+</Project>

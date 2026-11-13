@@ -5,13 +5,6 @@ using UnityEngine.UI;
 
 namespace MiniParty
 {
-    /// <summary>A gameplay event. Player = -1 for system events decided by the authority.</summary>
-    public struct GameAction
-    {
-        public int Kind, Player, A;
-        public float F;
-    }
-
     /// <summary>Network hook for minigames. Null when playing locally on one PC.</summary>
     public interface INetLink
     {
@@ -19,6 +12,10 @@ namespace MiniParty
         int LocalIndex { get; }
         bool Disconnected { get; }
         void SendAction(GameAction action);
+        /// <summary>Online: the server decides the winner. Only games without server rules report one.</summary>
+        void ClaimWinner(int player);
+        /// <summary>Online: logs a raw input on the server terminal only (never relayed to the opponent).</summary>
+        void ReportInput(GameAction input);
     }
 
     /// <summary>
@@ -88,6 +85,13 @@ namespace MiniParty
             Handle(act);
         }
 
+        /// <summary>
+        /// Online only: tells the server about an input that is not an action (e.g. a digit typed before confirming),
+        /// so the server terminal shows every input. The opponent never receives it.
+        /// </summary>
+        protected void ReportInput(int kind, int player, int a = 0, float f = 0f) =>
+            Net?.ReportInput(new GameAction { Kind = kind, Player = player, A = a, F = f });
+
         /// <summary>Called by the network layer with the opponent's actions.</summary>
         public void ReceiveAction(GameAction act) => Handle(act);
 
@@ -101,13 +105,20 @@ namespace MiniParty
             OnAction(act);
         }
 
-        /// <summary>Authority only: ends the game for everyone.</summary>
+        /// <summary>
+        /// Authority only. Offline this ends the round; online it only reports to the server, which confirms the
+        /// winner for both PCs (see <see cref="ForceWinner"/>).
+        /// </summary>
         protected void DeclareWinner(int player)
         {
             if (!IsAuthority || winnerSent) return;
             winnerSent = true;
-            Emit(KindWinner, -1, player);
+            if (Net == null) Handle(new GameAction { Kind = KindWinner, Player = -1, A = player });
+            else Net.ClaimWinner(player);
         }
+
+        /// <summary>Called by the network layer when the server announced the round's winner.</summary>
+        public void ForceWinner(int player) => Handle(new GameAction { Kind = KindWinner, Player = -1, A = player });
 
         // ---------- input for the player controlled on this machine ----------
         // One PC = one human player, so every key set works for them: WASD or arrows, Space or Enter, left click.

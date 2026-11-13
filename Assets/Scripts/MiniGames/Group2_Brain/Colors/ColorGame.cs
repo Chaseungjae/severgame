@@ -19,7 +19,7 @@ namespace MiniParty
         const float Duration = 30f;
         const float GridPx = 560f;
         const float WrongLock = 0.6f;
-        const int ActCorrect = 1, ActWrong = 2, ActFinal = 3;
+        const int ActCorrect = BrainProtocol.Colors.Correct, ActWrong = BrainProtocol.Colors.Wrong, ActFinal = BrainProtocol.Colors.Final;
 
         class Board
         {
@@ -128,9 +128,12 @@ namespace MiniParty
             for (int p = 0; p < 2; p++)
             {
                 var b = boards[p];
-                if (!IsLocal(p) || b.FinalSent) continue;
+                if (b.FinalSent || b.HasFinal) continue;
+                // 두 사람은 같은 순간(Go)에 시작하므로 상대 보드의 남은 시간도 내 시계로 같이 보여준다.
+                // 끝났다는 신호(ActFinal)는 그 보드의 주인 PC 만 보낸다.
                 b.Elapsed += Time.deltaTime;
                 b.Time.text = $"{Mathf.Max(0, Duration - b.Elapsed):0.0}s";
+                if (!IsLocal(p)) continue;
                 if (b.Elapsed >= Duration)
                 {
                     b.FinalSent = true;
