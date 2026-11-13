@@ -56,6 +56,9 @@
 - **초대코드 / 빠른 매칭**: Unity Relay 사용. 프로젝트가 Unity Cloud에 연결되어 있어야 합니다 (`Edit > Project Settings > Services`).
 - **IP / 서버 연결** (`[온라인 1:1] → [IP / 서버 연결]`)
   - **내가 방 열기**: 이 PC의 `IP:포트`(기본 7780)를 입력하면 UDP 게임 서버가 **별도 콘솔 창**으로 열리고 방장은 자동 입장. 화면의 주소를 친구에게 보내기.
+    - **공인 IP**도 입력할 수 있어요 (다른 네트워크의 친구와 할 때). 공인 IP는 PC가 아니라 공유기 주소라서 서버는 이 PC의 모든 주소(0.0.0.0)로 열리고,
+      방장은 127.0.0.1로 입장, 친구는 공인 IP:포트로 접속합니다. **공유기에서 UDP 포트를 이 PC 내부 IP로 포트포워딩**해야 해요 (서버 창에도 안내가 나와요).
+    - 이 PC 주소가 아닌 사설 IP(192.168.x.x 오타 등)는 거절합니다.
   - **UDP 서버 접속**: 친구가 연 서버(또는 따로 켜 둔 서버)의 `IP:포트`로 접속. `주소#방이름`으로 방 지정.
   - **로컬 플레이**: 서버 없이 P2P(Netcode, 포트 7777) — `방 열기` / `IP로 참가`. 같은 공유기나 라디민·하마치 같은 VPN에서.
 - P2P(초대코드·로컬 플레이)는 방장이 P1이며 미니게임 추첨·승패·데미지를 결정합니다. UDP 게임 서버에선 서버가 결정합니다.
@@ -81,8 +84,8 @@
 
 - **게임에서 열기**: `[내가 방 열기]` — 에디터에선 `dotnet build`로 서버를 빌드해서 실행(.NET SDK 필요), 빌드본에선 `Server/UdpGameServer.exe`를 실행합니다.
 - **직접 실행**: `cd UdpGameServer` → `dotnet run -c Release`
-  - 옵션: `[포트] [--bind IP] [--groups 1,3] [--damage N] [--game N] [--loss N] [--quiet]` — 기본 포트 **7780**,
-    `--bind`는 그 IP로만 열기, `--groups`는 서버가 진행할 조, `--game 0~5 / 11~15`는 한 게임만, `--loss N`은 받은 패킷 N%를 일부러 버리는 테스트
+  - 옵션: `[포트] [--bind IP] [--public IP] [--groups 1,3] [--damage N] [--game N] [--loss N] [--quiet]` — 기본 포트 **7780**,
+    `--bind`는 그 IP로만 열기, `--public IP`는 서버 창에 공인 IP·포트포워딩 안내 표시, `--groups`는 서버가 진행할 조, `--game 0~5 / 11~15`는 한 게임만, `--loss N`은 받은 패킷 N%를 일부러 버리는 테스트
 - **구조**
   - `Assets/Scripts/Net/UdpServer/UdpProtocol.cs` — 패킷 규격 + 신뢰성(순번·ACK·재전송·순서 보장)
   - `Assets/Scripts/Net/UdpServer/BoardProtocol.cs` — 1조(`Reaction1`)·3조(`Board3`) 게임 번호·액션 번호, 야추 족보 계산

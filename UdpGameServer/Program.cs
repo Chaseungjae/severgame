@@ -13,6 +13,7 @@ namespace MiniParty.Server
     ///   UdpGameServer.exe [port] [--bind IP] [--groups 1,3] [--damage N] [--game N] [--loss N] [--quiet] [--from-game]
     ///     port         UDP port (default 7780)
     ///     --bind IP    only this address of the PC (default: every address). The game's [내가 방 열기] passes it.
+    ///     --public IP  the router's public IP friends will type (only shown in the log, with a port-forwarding reminder)
     ///     --groups G   groups this server may run (default 1,3)
     ///     --damage N   damage per lost round (default: random 25~35)
     ///     --game N     only this minigame (registry index: 0~5 = 1조, 11~15 = 3조) — for testing one game
@@ -38,6 +39,9 @@ namespace MiniParty.Server
                     case "--damage": int.TryParse(Next(), out options.FixedDamage); break;
                     case "--game": int.TryParse(Next(), out options.ForcedGame); break;
                     case "--groups": options.Groups = Catalog.ParseGroups(Next()); break;
+                    case "--public":
+                        if (!IPAddress.TryParse(Next(), out options.Public)) options.Public = null;
+                        break;
                     case "--bind":
                         string ip = Next();
                         if (!IPAddress.TryParse(ip, out options.Bind) || options.Bind.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
@@ -82,6 +86,7 @@ namespace MiniParty.Server
     {
         public int Port = UdpWire.DefaultPort;
         public IPAddress Bind = IPAddress.Any;
+        public IPAddress Public;     // shown to the host only: the address friends use from the internet
         public int[] Groups = ServerGames.Groups;
         public bool Quiet;
         public bool FromGame;

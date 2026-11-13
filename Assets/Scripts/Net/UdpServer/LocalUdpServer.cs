@@ -13,6 +13,10 @@ namespace MiniParty.Udp
     /// <summary>
     /// [내가 방 열기]: runs the UDP game server (UdpGameServer) on this PC in its own console window, bound to the
     /// IP:port the player typed. The player then joins it like everyone else (Mode.UdpServer).
+    ///   - this PC's IP (LAN 192.168.x.x / VPN): the server opens on that address only.
+    ///   - a public IP: it belongs to the router, not this PC, so the server opens on every address of this PC
+    ///     (0.0.0.0) and the public IP is only the address shared with friends. The router must forward that UDP port
+    ///     to this PC (port forwarding); the host itself joins through 127.0.0.1.
     ///   Build  : &lt;game folder&gt;/Server/UdpGameServer.exe (self-contained, BuildTool copies it there; no .NET needed)
     ///   Editor : builds UdpGameServer/ with the .NET SDK (dotnet build -c Release) and runs bin/Release/net9.0/UdpGameServer.exe
     /// The window closes when the match ends, the player cancels, or the game quits.
@@ -22,8 +26,11 @@ namespace MiniParty.Udp
         static readonly List<LocalUdpServer> running = new List<LocalUdpServer>();
         static bool hookedQuit;
 
+        /// <summary>The address the player typed: this PC's IP, or the public IP when <see cref="IsPublic"/>.</summary>
         public readonly IPAddress Address;
         public readonly int Port;
+        /// <summary>A public IP was typed: the server listens on every address and needs router port forwarding.</summary>
+        public readonly bool IsPublic;
         /// <summary>Progress text while starting ("서버 빌드 중..."), or why it failed.</summary>
         public string Status { get; private set; } = "서버 프로그램 시작 중...";
         public bool Failed { get; private set; }
@@ -34,19 +41,33 @@ namespace MiniParty.Udp
         /// <summary>The address friends type in [UDP 서버 접속].</summary>
         public string ShareAddress => $"{Address}:{Port}";
 
-        LocalUdpServer(IPAddress address, int port)
+        /// <summary>Where the server opens its socket.</summary>
+        IPAddress BindAddress => IsPublic ? IPAddress.Any : Address;
+
+        /// <summary>
+        /// The address the host's own game joins. With a public IP that is 127.0.0.1: many routers don't let a PC
+        /// reach its own public IP from inside (no NAT loopback).
+        /// </summary>
+        public string ConnectAddress => IsPublic ? $"127.0.0.1:{Port}" : ShareAddress;
+
+        LocalUdpServer(IPAddress address, int port, bool isPublic)
         {
             Address = address;
             Port = port;
+            IsPublic = isPublic;
         }
 
         // ---------- input ----------
 
-        /// <summary>"192.168.0.5:7780" or "192.168.0.5" (port 7780). Only this PC's IPv4 addresses are allowed.</summary>
-        public static bool TryParse(string text, out IPAddress address, out int port, out string error)
+        /// <summary>
+        /// "192.168.0.5:7780" or "192.168.0.5" (port 7780): this PC's IPv4 address, or a public IP (isPublic = true).
+        /// A private address that isn't this PC's (a typo, another PC on the LAN) is refused.
+        /// </summary>
+        public static bool TryParse(string text, out IPAddress address, out int port, out bool isPublic, out string error)
         {
             address = null;
             port = UdpWire.DefaultPort;
+            isPublic = false;
             error = null;
             string host = (text ?? "").Trim();
             int colon = host.LastIndexOf(':');
@@ -64,17 +85,34 @@ namespace MiniParty.Udp
                 error = "IP 주소 형식이 아니에요 (예: 192.168.0.5:7780)";
                 return false;
             }
-            if (!address.Equals(IPAddress.Loopback) && !NetSession.LocalAddresses().Contains(address.ToString()))
+            var mine = NetSession.LocalAddresses();
+            if (!address.Equals(IPAddress.Loopback) && !mine.Contains(address.ToString()))
             {
-                error = $"{address} 는 이 PC의 IP가 아니에요\n이 PC: {string.Join(" / ", NetSession.LocalAddresses())}";
-                return false;
+                if (IsPrivate(address) || address.Equals(IPAddress.Any) || address.Equals(IPAddress.Broadcast))
+                {
+                    error = $"{address} 는 이 PC의 IP가 아니에요\n이 PC: {string.Join(" / ", mine)} · 또는 공인 IP";
+                    return false;
+                }
+                isPublic = true; // the router's address: open on every address of this PC, friends use the public IP
             }
-            if (!CanBind(address, port))
+            if (!CanBind(isPublic ? IPAddress.Any : address, port))
             {
                 error = $"포트 {port} 를 이미 다른 프로그램이 쓰고 있어요 (다른 포트로 해 보세요)";
                 return false;
             }
             return true;
+        }
+
+        /// <summary>Addresses that never reach a PC from the internet (LAN, VPN / CGNAT, link-local, loopback).</summary>
+        static bool IsPrivate(IPAddress ip)
+        {
+            byte[] b = ip.GetAddressBytes();
+            return b[0] == 10 || b[0] == 127 || b[0] == 0
+                || (b[0] == 172 && b[1] >= 16 && b[1] <= 31)
+                || (b[0] == 192 && b[1] == 168)
+                || (b[0] == 169 && b[1] == 254)
+                || (b[0] == 100 && b[1] >= 64 && b[1] <= 127) // CGNAT / Tailscale
+                || b[0] >= 224;                                 // multicast / reserved
         }
 
         /// <summary>True if nothing on this PC holds IP:port yet (the server is not up / the port is free).</summary>
@@ -96,9 +134,9 @@ namespace MiniParty.Udp
 
         // ---------- lifetime ----------
 
-        public static LocalUdpServer Start(IPAddress address, int port)
+        public static LocalUdpServer Start(IPAddress address, int port, bool isPublic)
         {
-            var server = new LocalUdpServer(address, port);
+            var server = new LocalUdpServer(address, port, isPublic);
             running.Add(server);
             if (!hookedQuit)
             {
@@ -132,7 +170,8 @@ namespace MiniParty.Udp
                 if (stopped) return;
                 if (exe == null) return; // Fail() already set the status
 
-                var info = new ProcessStartInfo(exe, $"{Port} --bind {Address} --from-game")
+                string args = $"{Port} --bind {BindAddress} --from-game" + (IsPublic ? $" --public {Address}" : "");
+                var info = new ProcessStartInfo(exe, args)
                 {
                     UseShellExecute = true,     // its own console window
                     CreateNoWindow = false,

@@ -192,7 +192,7 @@ namespace MiniParty
                     SetStatus("방장이 이 PC에서 UDP 서버를 열고\n친구는 그 IP:포트로 접속해요 (같은 공유기·VPN)", Palette.Muted);
                     break;
                 case View.EnterHost:
-                    SetStatus($"서버를 열 이 PC의 IP:포트 (포트 생략 시 {Udp.UdpWire.DefaultPort})\n이 PC: {string.Join(" / ", NetSession.LocalAddresses())}", Palette.Muted);
+                    SetStatus($"이 PC의 IP 또는 공인 IP:포트 (포트 생략 시 {Udp.UdpWire.DefaultPort})\n이 PC: {string.Join(" / ", NetSession.LocalAddresses())}", Palette.Muted);
                     break;
                 case View.EnterServer:
                     SetStatus($"접속할 서버의 IP:포트 (포트 생략 시 {Udp.UdpWire.DefaultPort})\n방 지정: 주소#방이름", Palette.Muted);
@@ -327,12 +327,13 @@ namespace MiniParty
         void OpenServer(string text)
         {
             if (view == View.Busy || view == View.Matched) return;
-            if (!Udp.LocalUdpServer.TryParse(text, out var ip, out int port, out string error))
+            if (!Udp.LocalUdpServer.TryParse(text, out var ip, out int port, out bool isPublic, out string error))
             {
                 SetStatus(error, Palette.Red);
                 return;
             }
-            StartCoroutine(ConnectRoutine(NetSession.Mode.UdpServer, $"{ip}:{port}", Udp.LocalUdpServer.Start(ip, port)));
+            var server = Udp.LocalUdpServer.Start(ip, port, isPublic);
+            StartCoroutine(ConnectRoutine(NetSession.Mode.UdpServer, server.ConnectAddress, server));
         }
 
         IEnumerator ConnectRoutine(NetSession.Mode mode, string arg, Udp.LocalUdpServer hosted)

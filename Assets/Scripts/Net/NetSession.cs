@@ -241,9 +241,10 @@ namespace MiniParty
                         await LeaveAsync();
                         return Fail("서버와 연결이 끊겼어요");
                     case Udp.UdpServerLink.Phase.Waiting:
-                        Status = HostedServer != null
-                            ? "서버를 열었어요! 친구는 [UDP 서버 접속]에\n아래 주소를 입력 — 상대를 기다리는 중..."
-                            : $"서버 방 {udp.Room} 입장 — 상대를 기다리는 중...";
+                        Status = HostedServer == null ? $"서버 방 {udp.Room} 입장 — 상대를 기다리는 중..."
+                            : HostedServer.IsPublic
+                                ? $"공인 IP로 열었어요 — 공유기에서 UDP {HostedServer.Port} 포트포워딩 필요\n친구는 [UDP 서버 접속]에 아래 주소 입력 · 기다리는 중..."
+                                : "서버를 열었어요! 친구는 [UDP 서버 접속]에\n아래 주소를 입력 — 상대를 기다리는 중...";
                         break;
                     default:
                         if (HostedServer != null && HostedServer.HasExited)

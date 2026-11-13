@@ -67,6 +67,11 @@ namespace MiniParty.Server
             Log.Line("서버가 방장: 미니게임 추첨 · 입력 검증 · 승패 · 데미지를 서버가 정합니다");
             string address = any ? string.Join(", ", LocalAddresses()) : options.Bind.ToString();
             Log.Line($"게임에서 [온라인 1:1] → [IP / 서버 연결] → [UDP 서버 접속] 에 입력할 주소: {address} (포트 {options.Port})");
+            if (options.Public != null)
+            {
+                Log.Line($"인터넷 너머 친구에게 보낼 주소: {options.Public}:{options.Port} (공인 IP)");
+                Log.Line($"  → 공유기 설정에서 UDP {options.Port} 포트를 이 PC({string.Join(" / ", LocalAddresses())})로 포트포워딩해야 접속돼요");
+            }
             if (options.FixedDamage > 0) Log.Line($"[테스트] 라운드 데미지 {options.FixedDamage} 고정");
             if (options.ForcedGame >= 0) Log.Line($"[테스트] 미니게임 {Catalog.Name(options.ForcedGame)} (#{options.ForcedGame}) 만 진행");
             if (options.LossPercent > 0) Log.Line($"[테스트] 받은 패킷의 {options.LossPercent}% 를 일부러 버립니다 (재전송 확인용)");
