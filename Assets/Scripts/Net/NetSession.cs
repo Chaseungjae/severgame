@@ -42,8 +42,8 @@ namespace MiniParty
         const string Channel = "mp";
 
         public bool IsHost { get; private set; }
-        /// <summary>0 = P1, 1 = P2. On the UDP game server the server assigns it (and both PCs are guests).</summary>
-        public int LocalIndex => udpIndex >= 0 ? udpIndex : IsHost ? 0 : 1;
+        /// <summary>0 = P1, 1 = P2. On a dedicated server (UdpGameServer or 1조 전용 서버) the server assigns it (both PCs are guests).</summary>
+        public int LocalIndex => udpIndex >= 0 ? udpIndex : dedicatedIndex >= 0 ? dedicatedIndex : IsHost ? 0 : 1;
         public string Status { get; private set; } = "";
         public bool Disconnected { get; private set; }
 
@@ -55,6 +55,8 @@ namespace MiniParty
         Udp.UdpServerLink udp;
         int udpIndex = -1;
         bool hooked;
+        Group1ServerLink dedicated; // 1조 전용 UDP 서버 연결 (Mode.DedicatedServer 일 때만)
+        int dedicatedIndex = -1;
         readonly List<NetMsg> inbox = new List<NetMsg>();
 
         public static void EnsureNetworkManager()
@@ -76,6 +78,7 @@ namespace MiniParty
             JoinDirect,   // direct IP: connect to the host's address
             UdpServer,    // dedicated UDP game server (UdpGameServer/): arg = "address[:port][#room]".
                           // The server is the authority (round picks, rules, results); both PCs are guests.
+            DedicatedServer, // 1조 전용 UDP 서버 (UDPServer/Group1Server): arg = "ip[:port]". 서버가 방장, 1조 게임만 나옴
         }
 
         public const ushort DirectPort = 7777;
@@ -87,6 +90,8 @@ namespace MiniParty
         {
             try
             {
+                if (mode == Mode.DedicatedServer) return await ConnectDedicatedAsync(arg, ct);
+
                 EnsureNetworkManager();
                 var nm = NetworkManager.Singleton;
                 while (nm.ShutdownInProgress) await Task.Delay(50);
@@ -249,6 +254,39 @@ namespace MiniParty
             Deliver(new NetMsg { Type = (MsgType)type, A = a, B = b, C = c, D = d, F = fl });
         }
 
+        /// <summary>1조 전용 서버에 접속해서 같은 방에 상대가 들어올 때까지 기다린다.</summary>
+        async Task<bool> ConnectDedicatedAsync(string arg, CancellationToken ct)
+        {
+            Status = "서버 주소 확인 중...";
+            if (!Group1ServerLink.TryParseAddress(arg, out var endpoint, out string error)) return Fail(error);
+
+            IsHost = false; // 서버가 방장 (게임 추첨·승패·데미지 결정)
+            dedicated = Group1ServerLink.Create(endpoint);
+            dedicated.NetMessage += Deliver;
+            dedicated.Lost += () => Disconnected = true;
+            while (true)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    await LeaveAsync();
+                    return false;
+                }
+                switch (dedicated.State)
+                {
+                    case Group1ServerLink.LinkState.Matched:
+                        dedicatedIndex = dedicated.LocalIndex;
+                        Status = "연결 완료!";
+                        return true;
+                    case Group1ServerLink.LinkState.Failed:
+                        string status = dedicated.Status;
+                        await LeaveAsync();
+                        return Fail(status);
+                }
+                Status = dedicated.Status;
+                await Task.Delay(50);
+            }
+        }
+
         static UnityTransport Transport => (UnityTransport)NetworkManager.Singleton.NetworkConfig.NetworkTransport;
 
         bool Fail(string status)
@@ -365,6 +403,7 @@ namespace MiniParty
             Deliver(new NetMsg { Type = (MsgType)type, A = a, B = b, C = c, D = d, F = f });
         }
 
+        /// <summary>받은 메시지 처리 (Netcode / 1조 전용 서버 공통).</summary>
         void Deliver(NetMsg msg)
         {
             if (msg.Type == MsgType.Action)
@@ -383,6 +422,11 @@ namespace MiniParty
                 if (!Disconnected)
                     udp.Send(string.Format(System.Globalization.CultureInfo.InvariantCulture, "MSG|{0}|{1}|{2}|{3}|{4}|{5:R}",
                         (byte)msg.Type, msg.A, msg.B, msg.C, msg.D, msg.F));
+                return;
+            }
+            if (dedicated != null)
+            {
+                if (!Disconnected) dedicated.Send(msg);
                 return;
             }
             var nm = NetworkManager.Singleton;
@@ -463,6 +507,12 @@ namespace MiniParty
                 udp.Close();
                 udp = null;
                 return;
+            }
+            if (dedicated != null)
+            {
+                dedicated.NetMessage -= Deliver;
+                dedicated.Close();
+                dedicated = null;
             }
             var nm = NetworkManager.Singleton;
             if (nm != null)
