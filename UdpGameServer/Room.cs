@@ -6,7 +6,7 @@ using MiniParty.Udp;
 namespace MiniParty.Server
 {
     /// <summary>
-    /// One 1:1 match. The server plays the part the host PC used to play (GameManager / LobbyScreen authority):
+    /// One 1:1 match of 1조 (반응·연타) and/or 3조 (보드·턴제) minigames, depending on <see cref="Groups"/>. The server plays the part the host PC used to play (GameManager / LobbyScreen authority):
     ///   Hello ×2 → Welcome (characters)                         lobby handshake
     ///   StartRound → Barrier(ready) ×2 → Go → countdown → rules  each round
     ///   rules decide → Action(winner) → RoundResult(damage)      result
@@ -19,19 +19,21 @@ namespace MiniParty.Server
         enum Phase { Lobby, Ready, Countdown, Playing, Result, Over }
 
         const int BarrierReady = 1, BarrierNext = 2;   // same tags as GameManager
-        const double CountdownTime = 3.0;               // client 3-2-1-START before Play() starts
         const int MaxHp = 100;
 
         public readonly string Id;
         public readonly bool Named;
+        /// <summary>Minigame groups this room draws from (the first player's scene: 1조 / 3조 / 통합).</summary>
+        public readonly int[] Groups;
         readonly GameServer server;
         readonly Client[] slots = new Client[2];
         readonly int[] character = { -1, -1 };
         readonly int[] hp = { MaxHp, MaxHp };
         readonly HashSet<int>[] barriers = { new HashSet<int>(), new HashSet<int>() };
         readonly List<int> deck = new();
+        readonly List<Msg> deferred = new();
         Phase phase = Phase.Lobby;
-        bool closed;
+        bool closed, inPlayerAction;
         int round, gameIndex, seed;
         double countdown;
         RoundRules rules;
@@ -40,12 +42,15 @@ namespace MiniParty.Server
         public int Seed => seed;
         public int Round => round;
 
-        public Room(GameServer server, string id, bool named)
+        public Room(GameServer server, string id, bool named, int[] groups)
         {
             this.server = server;
             Id = id;
             Named = named;
+            Groups = groups;
         }
+
+        public string GroupKey => string.Join(",", Groups);
 
         public int Count => (slots[0] != null ? 1 : 0) + (slots[1] != null ? 1 : 0);
         public bool Open => !closed && Count < 2;
@@ -125,7 +130,7 @@ namespace MiniParty.Server
             if (tag == round * 10 + BarrierReady && phase == Phase.Ready)
             {
                 phase = Phase.Countdown;
-                countdown = CountdownTime;
+                countdown = Catalog.Countdown(gameIndex);
                 rules = RoundRules.Create(gameIndex, this);
             }
             else if (tag == round * 10 + BarrierNext && phase == Phase.Result)
@@ -137,19 +142,29 @@ namespace MiniParty.Server
         void OnAction(int p, Msg msg)
         {
             if (msg.D != round || rules == null) return; // late packet from an earlier minigame
-            if (msg.B != p)
+            if (msg.B != p || msg.A == Board3.KindWinner)
             {
-                Note($"P{p + 1} 이(가) 남의 이름(P{msg.B + 1})으로 보낸 입력 거절");
+                Note(msg.B != p ? $"P{p + 1} 이(가) 남의 이름(P{msg.B + 1})으로 보낸 입력 거절 ({msg})"
+                                : $"P{p + 1} 이(가) 승자 결정 액션을 보냄 → 거절 (승패는 서버가 정함)");
                 return;
             }
             if (phase != Phase.Playing && phase != Phase.Countdown) return;
 
-            var verdict = rules.OnPlayerAction(p, msg.A, msg.C, msg.F, out string why);
+            int a = msg.C;
+            float f = msg.F;
+            Verdict verdict;
+            string why;
+            inPlayerAction = true;
+            try { verdict = rules.OnPlayerAction(p, msg.A, ref a, ref f, out why); }
+            finally { inPlayerAction = false; }
+
             switch (verdict)
             {
                 case Verdict.Relay:
-                    server.Send(slots[1 - p], msg);
-                    if (!server.Options.Quiet) Log.Line($"{Id}/P{p + 1} → P{2 - p}  {Describe(msg)}");
+                    // the rules may have replaced the value (e.g. the server's own click count)
+                    var relayed = Msg.Action(msg.A, p, a, round, f);
+                    server.Send(slots[1 - p], relayed);
+                    if (!server.Options.Quiet) Log.Line($"{Id}/P{p + 1} → P{2 - p}  {Describe(relayed)}");
                     break;
                 case Verdict.Consumed:
                     if (!server.Options.Quiet) Log.Line($"{Id}/P{p + 1} → 서버  {Describe(msg)}");
@@ -158,9 +173,14 @@ namespace MiniParty.Server
                     Note($"P{p + 1} 입력 거절 ({Describe(msg)}): {why}");
                     break;
             }
+
+            // what the rules sent because of this action (hit results, the winner...) goes out after the relay
+            var queued = deferred.ToArray();
+            deferred.Clear();
+            foreach (var m in queued) ForEach(s => server.Send(s, m));
         }
 
-        string Describe(Msg msg) => $"{GameName(gameIndex)} {msg}";
+        string Describe(Msg msg) => $"{Catalog.Name(gameIndex)} {msg}";
 
         // ---------- round flow ----------
 
@@ -172,7 +192,7 @@ namespace MiniParty.Server
             {
                 if (deck.Count == 0)
                 {
-                    deck.AddRange(Board3.Games);
+                    deck.AddRange(Catalog.GamesOf(Groups));
                     for (int i = deck.Count - 1; i > 0; i--)
                     {
                         int j = Rng.Next(i + 1);
@@ -187,7 +207,7 @@ namespace MiniParty.Server
             rules = null;
             phase = Phase.Ready;
             ForEach(s => server.Send(s, new Msg { Type = WireMsg.StartRound, A = round, B = gameIndex, C = seed }));
-            Log.Line($"방 {Id}: ROUND {round} — {GameName(gameIndex)} (HP {hp[0]} : {hp[1]})");
+            Log.Line($"방 {Id}: ROUND {round} — {Catalog.Name(gameIndex)} (HP {hp[0]} : {hp[1]})");
         }
 
         public void Tick(double dt)
@@ -206,11 +226,18 @@ namespace MiniParty.Server
 
         // ---------- IRoundHost (used by the rules) ----------
 
-        public void Broadcast(int kind, int a, float f = 0f) =>
-            ForEach(s => server.Send(s, Msg.Action(kind, -1, a, round, f)));
+        public double Now => server.Now;
 
-        public void SendAs(int player, int kind, int a, float f = 0f) =>
-            ForEach(s => server.Send(s, Msg.Action(kind, player, a, round, f)));
+        public void Broadcast(int kind, int a, float f = 0f) => SendBoth(Msg.Action(kind, -1, a, round, f));
+
+        public void SendAs(int player, int kind, int a, float f = 0f) => SendBoth(Msg.Action(kind, player, a, round, f));
+
+        /// <summary>To both players; while a player's action is being handled, after that action is relayed.</summary>
+        void SendBoth(Msg msg)
+        {
+            if (inPlayerAction) deferred.Add(msg);
+            else ForEach(s => server.Send(s, msg));
+        }
 
         public void Declare(int winner, string reason)
         {
@@ -221,8 +248,8 @@ namespace MiniParty.Server
             hp[loser] = Math.Max(0, hp[loser] - damage);
 
             Broadcast(Board3.KindWinner, winner);
-            ForEach(s => server.Send(s, new Msg { Type = WireMsg.RoundResult, A = winner, B = damage }));
-            Log.Line($"방 {Id}: ROUND {round} 승자 P{winner + 1} ({reason}) — P{loser + 1} -{damage} → HP {hp[0]} : {hp[1]}");
+            SendBoth(new Msg { Type = WireMsg.RoundResult, A = winner, B = damage });
+            Log.Line($"방 {Id}: ROUND {round} {Catalog.Name(gameIndex)} 승자 P{winner + 1} ({reason}) — P{loser + 1} -{damage} → HP {hp[0]} : {hp[1]}");
 
             if (hp[loser] <= 0)
             {
@@ -234,14 +261,5 @@ namespace MiniParty.Server
 
         public void Note(string text) => Log.Line($"방 {Id}: {text}");
 
-        static string GameName(int index) => index switch
-        {
-            Board3.ConnectFour => "사목",
-            Board3.Othello => "오델로",
-            Board3.Circle => "원을 그려봐요",
-            Board3.Typing => "타자 대결",
-            Board3.Yacht => "야추 다이스",
-            _ => "#" + index,
-        };
     }
 }

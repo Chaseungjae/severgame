@@ -18,7 +18,7 @@ namespace MiniParty.Server.Games
 
         public CircleRules(IRoundHost host) : base(host) { }
 
-        public override Verdict OnPlayerAction(int p, int kind, int a, float f, out string why)
+        public override Verdict OnPlayerAction(int p, int kind, ref int a, ref float f, out string why)
         {
             if (Decided) return Reject(out why, "이미 끝난 판");
             if (kind != Board3.CircleTry) return Reject(out why, $"원 그리기에 없는 액션 {kind}");
@@ -69,7 +69,7 @@ namespace MiniParty.Server.Games
 
         public TypingRules(IRoundHost host) : base(host) { }
 
-        public override Verdict OnPlayerAction(int p, int kind, int a, float f, out string why)
+        public override Verdict OnPlayerAction(int p, int kind, ref int a, ref float f, out string why)
         {
             if (Decided) return Reject(out why, "이미 끝난 판");
             if (hasFinal[p]) return Reject(out why, "이미 끝낸 사람");

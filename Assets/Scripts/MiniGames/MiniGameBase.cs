@@ -290,13 +290,31 @@ namespace MiniParty
         public static readonly string[] GroupNames = { "전체", Group1Games.Name, Group2Games.Name, Group3Games.Name, Group4Games.Name };
 
         /// <summary>
-        /// 0 = every game. 1-4 = only that group's games (set by GameManager when a Groups/GroupN_* scene is open,
-        /// so each group can test their own games without touching the main scene).
+        /// Empty = every game. {1} = only 1조's games, {1, 3} = 1조 + 3조 ... Set by GameManager from the scene name:
+        /// Groups/Group1_Reaction → {1}, Groups/Group13_Combined → {1, 3} (each digit after "Group" is a group),
+        /// so groups can test their own games without touching the main scene.
         /// </summary>
-        public static int ActiveGroup;
+        public static int[] ActiveGroups = new int[0];
+
+        /// <summary>"Group13_Combined" → {1, 3}; any other scene name → empty (every game).</summary>
+        public static int[] GroupsFromSceneName(string scene)
+        {
+            var groups = new System.Collections.Generic.List<int>();
+            if (scene != null && scene.StartsWith("Group"))
+                for (int i = 5; i < scene.Length && char.IsDigit(scene[i]); i++)
+                {
+                    int g = scene[i] - '0';
+                    if (g >= 1 && g < GroupNames.Length && !groups.Contains(g)) groups.Add(g);
+                }
+            return groups.ToArray();
+        }
+
+        /// <summary>"1조 · 반응·연타 + 3조 · 보드·턴제" for the active groups, or null when every game is on.</summary>
+        public static string ActiveGroupLabel() =>
+            ActiveGroups.Length == 0 ? null : string.Join(" + ", Array.ConvertAll(ActiveGroups, g => GroupNames[g]));
 
         /// <summary>
-        /// 테스트용: 0 이상이면 라운드마다 이 게임(Games 번호)만 나온다. 조별 테스트 패널(Group1TestPanel 등)이 쓴다.
+        /// 테스트용: 0 이상이면 라운드마다 이 게임(Games 번호)만 나온다.
         /// 온라인에서는 게임을 고르는 쪽(방장)에서만 효과가 있으므로 양쪽이 어긋나지 않는다.
         /// </summary>
         public static int ForcedGame = -1;
@@ -326,7 +344,7 @@ namespace MiniParty
                 return pool;
             }
             for (int i = 0; i < Games.Length; i++)
-                if (ActiveGroup == 0 || GroupOf[i] == ActiveGroup) pool.Add(i);
+                if (ActiveGroups.Length == 0 || Array.IndexOf(ActiveGroups, GroupOf[i]) >= 0) pool.Add(i);
             if (pool.Count == 0) for (int i = 0; i < Games.Length; i++) pool.Add(i);
             return pool;
         }

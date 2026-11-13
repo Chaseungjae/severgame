@@ -8,6 +8,8 @@
     <AssemblyName>UdpGameServer</AssemblyName>
     <RootNamespace>MiniParty.Server</RootNamespace>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- run on a newer .NET runtime too (e.g. a PC with only .NET 10 installed); game builds ship a self-contained exe -->
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>

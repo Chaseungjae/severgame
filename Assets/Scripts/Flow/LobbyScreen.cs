@@ -12,9 +12,11 @@ namespace MiniParty
     /// Step 1: character select. One PC is always one human player. Two modes:
     ///  - CPU 대전: you vs the CPU (P1 can also be set to CPU to watch a CPU vs CPU test match).
     ///  - Online: pick your character, then play a friend:
-    ///      빠른 매칭 (any open room) · 방 만들기 → share the code · 코드로 참가 · IP 직접 연결 (LAN / VPN)
-    ///      · UDP 서버 접속 (dedicated UdpGameServer: both players type the server's address).
-    ///      · 1조 전용 서버 (UDPServer/Group1Server 에 접속, 서버가 방장이고 1조 게임만 나옴).
+    ///      빠른 매칭 (any open room) · 방 만들기 → share the code · 코드로 참가 · IP / 서버 연결:
+    ///      · 내가 방 열기: type this PC's IP:port → the UDP game server (UdpGameServer) opens in its own console
+    ///        window and this PC joins it; the friend types the same IP:port in [UDP 서버 접속].
+    ///      · UDP 서버 접속: join a running UDP game server by IP:port (the server picks games and judges, 1조 + 3조).
+    ///      · 로컬 플레이: P2P without a server (Netcode direct IP, LAN / VPN): 방 열기 · IP로 참가.
     /// </summary>
     public class LobbyScreen : MonoBehaviour
     {
@@ -23,9 +25,7 @@ namespace MiniParty
         /// <summary>Set when an online match was found. Null for local play.</summary>
         public NetSession Session { get; private set; }
 
-        enum View { Menu, EnterCode, IpMenu, EnterIp, EnterServer, EnterGroup1, Busy, Matched }
-
-        const string ServerAddressKey = "Group1ServerAddress";
+        enum View { Menu, EnterCode, IpMenu, EnterHost, EnterServer, LocalMenu, EnterIp, Busy, Matched }
 
         readonly int[] selection = { 0, 1 };
         readonly bool[] ready = new bool[2];
@@ -47,7 +47,6 @@ namespace MiniParty
         NetSession pending;
         int selectedHost, selectedClient;
         bool hooked;
-        const string ServerPref = "MiniParty.UdpServer";
 
         public static LobbyScreen Create(Transform parent)
         {
@@ -66,8 +65,8 @@ namespace MiniParty
             UIKit.Shadow(title, 6f);
             UIKit.Label("Sub", transform, "캐릭터를 고르고 준비하세요 — 미니게임에서 지면 벌칙! HP가 먼저 0이 되면 패배", 30, Palette.Muted, style: FontStyle.Normal)
                 .rectTransform.Place(new Vector2(0, 340), new Vector2(1400, 44));
-            if (MiniGameRegistry.ActiveGroup > 0)
-                UIKit.Label("Group", transform, $"[{MiniGameRegistry.GroupNames[MiniGameRegistry.ActiveGroup]}] 테스트 씬 — 이 조의 미니게임만 나와요", 28, Palette.Gold)
+            if (MiniGameRegistry.ActiveGroupLabel() is string groups)
+                UIKit.Label("Group", transform, $"[{groups}] 테스트 씬 — 이 조의 미니게임만 나와요", 28, Palette.Gold)
                     .rectTransform.Place(new Vector2(0, 500), new Vector2(1400, 44));
 
             for (int p = 0; p < 2; p++)
@@ -140,20 +139,25 @@ namespace MiniParty
             AddButton(View.EnterCode, "참가하기", new Vector2(-150, -210), green, SubmitEntry);
             AddButton(View.EnterCode, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.Menu));
 
-            AddButton(View.IpMenu, "내가 방 열기", new Vector2(-150, -110), blue, () => StartConnect(NetSession.Mode.HostDirect, null));
-            AddButton(View.IpMenu, "IP로 참가", new Vector2(150, -110), green, () => Show(View.EnterIp));
-            AddButton(View.IpMenu, "UDP 서버 접속", new Vector2(-150, -185), Palette.Hex("#A66CFF"), () => Show(View.EnterServer));
-            AddButton(View.IpMenu, "1조 전용 서버", new Vector2(150, -185), Palette.Hex("#D9822B"), () => Show(View.EnterGroup1));
-            AddButton(View.IpMenu, "뒤로", new Vector2(0, -260), Palette.PanelLight, () => Show(View.Menu));
+            var purple = Palette.Hex("#A66CFF");
+            AddButton(View.IpMenu, "내가 방 열기", new Vector2(-150, -110), blue, () => Show(View.EnterHost));
+            AddButton(View.IpMenu, "UDP 서버 접속", new Vector2(150, -110), purple, () => Show(View.EnterServer));
+            AddButton(View.IpMenu, "로컬 플레이", new Vector2(-150, -185), green, () => Show(View.LocalMenu));
+            AddButton(View.IpMenu, "뒤로", new Vector2(150, -185), Palette.PanelLight, () => Show(View.Menu));
+
+            AddButton(View.EnterHost, "서버 열기", new Vector2(-150, -210), blue, SubmitEntry);
+            AddButton(View.EnterHost, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.IpMenu));
 
             AddButton(View.EnterServer, "접속", new Vector2(-150, -210), green, SubmitEntry);
             AddButton(View.EnterServer, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.IpMenu));
 
-            AddButton(View.EnterIp, "접속", new Vector2(-150, -210), green, SubmitEntry);
-            AddButton(View.EnterIp, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.IpMenu));
+            // 로컬 플레이: P2P direct IP (Netcode, port 7777) — no server program, same LAN / VPN
+            AddButton(View.LocalMenu, "방 열기", new Vector2(-150, -110), blue, () => StartConnect(NetSession.Mode.HostDirect, null));
+            AddButton(View.LocalMenu, "IP로 참가", new Vector2(150, -110), green, () => Show(View.EnterIp));
+            AddButton(View.LocalMenu, "뒤로", new Vector2(0, -185), Palette.PanelLight, () => Show(View.IpMenu));
 
-            AddButton(View.EnterGroup1, "서버 접속", new Vector2(-150, -210), green, SubmitEntry);
-            AddButton(View.EnterGroup1, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.IpMenu));
+            AddButton(View.EnterIp, "접속", new Vector2(-150, -210), green, SubmitEntry);
+            AddButton(View.EnterIp, "뒤로", new Vector2(150, -210), Palette.PanelLight, () => Show(View.LocalMenu));
 
             AddButton(View.Busy, "취소", new Vector2(0, -210), Palette.Red, () => cancel?.Cancel());
 
@@ -173,7 +177,6 @@ namespace MiniParty
                 foreach (var go in pair.Value) go.SetActive(pair.Key == v);
 
             entry.Clear();
-            if (v == View.EnterGroup1) entry.Append(PlayerPrefs.GetString(ServerAddressKey, "127.0.0.1")); // 지난번 주소
             bool entering = Entering(v);
             field.gameObject.SetActive(entering);
             copyButton.SetActive(false);
@@ -186,17 +189,19 @@ namespace MiniParty
                     SetStatus("친구에게 받은 초대코드를 입력하세요 (Ctrl+V 붙여넣기)", Palette.Muted);
                     break;
                 case View.IpMenu:
-                    SetStatus("같은 와이파이·공유기, 또는 라디민·하마치 같은 VPN에서 사용\n방 연 사람의 IP를 친구가 입력합니다", Palette.Muted);
+                    SetStatus("방장이 이 PC에서 UDP 서버를 열고\n친구는 그 IP:포트로 접속해요 (같은 공유기·VPN)", Palette.Muted);
+                    break;
+                case View.EnterHost:
+                    SetStatus($"서버를 열 이 PC의 IP:포트 (포트 생략 시 {Udp.UdpWire.DefaultPort})\n이 PC: {string.Join(" / ", NetSession.LocalAddresses())}", Palette.Muted);
+                    break;
+                case View.EnterServer:
+                    SetStatus($"접속할 서버의 IP:포트 (포트 생략 시 {Udp.UdpWire.DefaultPort})\n방 지정: 주소#방이름", Palette.Muted);
+                    break;
+                case View.LocalMenu:
+                    SetStatus("서버 없이 P2P로 직접 연결 (같은 공유기·VPN)\n한 명은 방 열기, 다른 한 명은 IP로 참가", Palette.Muted);
                     break;
                 case View.EnterIp:
                     SetStatus("방 연 친구의 IP를 입력하세요 (예: 192.168.0.5)", Palette.Muted);
-                    break;
-                case View.EnterServer:
-                    SetStatus("UDP 게임 서버 주소를 입력하세요 (예: 192.168.0.5)\n먼저 온 두 명이 자동으로 짝지어져요 · 방 지정: 주소#방이름", Palette.Muted);
-                    entry.Append(PlayerPrefs.GetString(ServerPref, ""));
-                    break;
-                case View.EnterGroup1:
-                    SetStatus("1조 전용 서버 주소 (예: 192.168.0.5 / 포트 생략 시 33333)\n서버가 게임 추첨·승패 판정 · 1조 게임만 나와요", Palette.Muted);
                     break;
             }
             RefreshEntry();
@@ -209,12 +214,28 @@ namespace MiniParty
             onlineStatus.color = color;
         }
 
-        static bool Entering(View v) => v == View.EnterCode || v == View.EnterIp || v == View.EnterServer || v == View.EnterGroup1;
+        static bool Entering(View v) => v == View.EnterCode || v == View.EnterIp || v == View.EnterServer || v == View.EnterHost;
+
+        /// <summary>Grey example shown in the empty field (never typed in for the player).</summary>
+        static string Hint(View v)
+        {
+            if (v == View.EnterHost)
+            {
+                var mine = NetSession.LocalAddresses();
+                string ip = mine.Find(a => a.StartsWith("192.168.")) ?? mine[0];
+                return $"예: {ip}:{Udp.UdpWire.DefaultPort}";
+            }
+            if (v == View.EnterServer) return $"예: 192.168.0.5:{Udp.UdpWire.DefaultPort}";
+            return null;
+        }
 
         void RefreshEntry()
         {
-            if (Entering(view))
-                fieldText.text = entry + "<color=#9AA3C7>|</color>";
+            if (!Entering(view)) return;
+            string hint = entry.Length == 0 ? Hint(view) : null;
+            fieldText.text = hint != null
+                ? $"<color=#9AA3C7>|</color><color=#5C6488>{hint}</color>"
+                : entry + "<color=#9AA3C7>|</color>";
         }
 
         void CopyShare()
@@ -254,6 +275,7 @@ namespace MiniParty
             if (char.IsControl(c) || char.IsWhiteSpace(c)) return false;
             if (view == View.EnterCode) return c < 128 && char.IsLetterOrDigit(c);
             if (view == View.EnterServer) return c < 128 && (char.IsLetterOrDigit(c) || c == '.' || c == ':' || c == '-' || c == '#' || c == '_');
+            if (view == View.EnterHost) return c < 128 && (char.IsDigit(c) || c == '.' || c == ':');
             return c < 128 && (char.IsLetterOrDigit(c) || c == '.' || c == ':' || c == '-');
         }
 
@@ -273,7 +295,7 @@ namespace MiniParty
                 RefreshEntry();
             }
             if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) SubmitEntry();
-            if (kb.escapeKey.wasPressedThisFrame) Show(view == View.EnterIp || view == View.EnterServer || view == View.EnterGroup1 ? View.IpMenu : View.Menu);
+            if (kb.escapeKey.wasPressedThisFrame) Show(view == View.EnterIp ? View.LocalMenu : view == View.EnterServer || view == View.EnterHost ? View.IpMenu : View.Menu);
         }
 
         void SubmitEntry()
@@ -282,14 +304,12 @@ namespace MiniParty
             if (text.Length == 0) return;
             if (view == View.EnterServer)
             {
-                PlayerPrefs.SetString(ServerPref, text);
                 StartConnect(NetSession.Mode.UdpServer, text);
                 return;
             }
-            if (view == View.EnterGroup1)
+            if (view == View.EnterHost)
             {
-                PlayerPrefs.SetString(ServerAddressKey, text);
-                StartConnect(NetSession.Mode.DedicatedServer, text);
+                OpenServer(text);
                 return;
             }
             StartConnect(view == View.EnterCode ? NetSession.Mode.JoinRoom : NetSession.Mode.JoinDirect, text);
@@ -300,14 +320,27 @@ namespace MiniParty
         void StartConnect(NetSession.Mode mode, string arg)
         {
             if (view == View.Busy || view == View.Matched) return;
-            StartCoroutine(ConnectRoutine(mode, arg));
+            StartCoroutine(ConnectRoutine(mode, arg, null));
         }
 
-        IEnumerator ConnectRoutine(NetSession.Mode mode, string arg)
+        /// <summary>[내가 방 열기]: "IP:포트" → start the UDP game server on this PC, then join it.</summary>
+        void OpenServer(string text)
         {
-            var back = view == View.EnterGroup1 ? View.EnterGroup1 : view == View.EnterIp || view == View.IpMenu || view == View.EnterServer ? View.IpMenu : View.Menu;
+            if (view == View.Busy || view == View.Matched) return;
+            if (!Udp.LocalUdpServer.TryParse(text, out var ip, out int port, out string error))
+            {
+                SetStatus(error, Palette.Red);
+                return;
+            }
+            StartCoroutine(ConnectRoutine(NetSession.Mode.UdpServer, $"{ip}:{port}", Udp.LocalUdpServer.Start(ip, port)));
+        }
+
+        IEnumerator ConnectRoutine(NetSession.Mode mode, string arg, Udp.LocalUdpServer hosted)
+        {
+            var back = view == View.EnterIp || view == View.LocalMenu ? View.LocalMenu
+                : view == View.IpMenu || view == View.EnterServer || view == View.EnterHost ? View.IpMenu : View.Menu;
             Show(View.Busy);
-            var session = new NetSession();
+            var session = new NetSession { HostedServer = hosted };
             pending = session;
             cancel = new CancellationTokenSource();
             var task = session.ConnectAsync(mode, arg, cancel.Token);
@@ -318,8 +351,8 @@ namespace MiniParty
                 field.gameObject.SetActive(share);
                 copyButton.SetActive(share);
                 if (share)
-                    fieldText.text = mode == NetSession.Mode.HostDirect
-                        ? $"<size=24>{session.ShareText}</size>"
+                    fieldText.text = mode == NetSession.Mode.HostDirect ? $"<size=24>{session.ShareText}</size>"
+                        : mode == NetSession.Mode.UdpServer ? $"<size=34><b>{session.ShareText}</b></size>"
                         : $"<size=44><b>{session.ShareText}</b></size>";
                 yield return null;
             }
@@ -333,7 +366,7 @@ namespace MiniParty
                 yield break;
             }
 
-            // handshake: swap characters (host = P1, client = P2; 1조 전용 서버면 서버가 정한 순서)
+            // handshake: swap characters (host = P1, client = P2; UDP 게임 서버면 서버가 정한 순서)
             SetStatus("상대 정보 받는 중...", Palette.Muted);
             int hostChar = 0, clientChar = 0;
             if (session.IsHost)
@@ -490,10 +523,11 @@ namespace MiniParty
                 RebuildPreview(0);
                 StartConnect(NetSession.Mode.JoinDirect, ip);
             }
-            else if (DevArgs.Get("-autoserver") is string group1Server)
+            else if (DevArgs.Get("-hostserver") is string hostAddress)
             {
                 SetMode(true);
-                StartConnect(NetSession.Mode.DedicatedServer, group1Server);
+                Show(View.EnterHost);
+                OpenServer(hostAddress);
             }
 
             while (true)

@@ -53,6 +53,43 @@ namespace MiniParty.Udp
         public const float YachtTimeLimit = 30f;
     }
 
+    /// <summary>
+    /// 1조 (반응·연타) minigames as the UDP game server sees them (moved here from the old 1조 전용 서버).
+    /// Registry indices = MiniGameRegistry.Games order (1조 comes first). Action kinds MUST match the game scripts
+    /// (Assets/Scripts/MiniGames/Group1_Reaction, e.g. SpaceTugGame.ActPull); UdpServerLink.CheckRegistry checks the indices.
+    /// </summary>
+    public static class Reaction1
+    {
+        public const int SpaceTug = 0, Cps = 1, F1Reaction = 2, Aim = 3, Stack = 4, Timing = 5;
+        public static readonly int[] Games = { SpaceTug, Cps, F1Reaction, Aim, Stack, Timing };
+
+        /// <summary>Same as <see cref="Board3.KindWinner"/>.</summary>
+        public const int KindWinner = Board3.KindWinner;
+
+        // SpaceTugGame
+        public const int TugPull = 1, TugOffset = 2;            // Offset: system, F = flag position
+        // CpsGame
+        public const int CpsClick = 1, CpsFinal = 2;            // Final: A = clicks, F = last click time
+        // F1ReactionGame
+        public const int F1HeatStart = 1, F1Report = 2, F1HeatResult = 3;
+        public const int F1CodeReact = 0, F1CodeJump = 1, F1CodeNone = 2;
+        // AimGame
+        public const int AimHit = 1, AimFinal = 2;              // Hit: A = target, F = reaction time
+        // StackGame
+        public const int StackPlace = 1, StackFail = 2;         // Place: A = level*100000 + (left+50000), F = width
+        // TimingGame
+        public const int TimingHit = 1, TimingMiss = 2, TimingOut = 3;
+    }
+
+    /// <summary>Which minigame groups the UDP server can run (the server is the authority for these).</summary>
+    public static class ServerGames
+    {
+        public static readonly int[] Groups = { 1, 3 };
+
+        /// <summary>Registry indices of one group's games, or an empty array if the server does not run that group.</summary>
+        public static int[] Of(int group) => group == 1 ? Reaction1.Games : group == 3 ? Board3.Games : new int[0];
+    }
+
     /// <summary>야추 hands, used by YachtGame (client) and the server's YachtRules so both rank dice the same way.</summary>
     public static class YachtHands
     {

@@ -1,13 +1,14 @@
-using MiniParty.Group1Net;
+using System;
+using MiniParty.Udp;
 
-namespace Group1Server.Games;
+namespace MiniParty.Server.Games;
 
 /// <summary>
 /// 블럭 쌓기 (StackGame). 각 PC 가 자기 블럭을 움직이고 떨어뜨린 결과(층, 왼쪽 위치, 폭)를 보낸다.
 /// 서버는 탑 상태를 따라가며 "한 층씩만 오르는지, 블럭이 넓어지거나 아래 블럭 밖에 놓이지 않았는지" 검사하고,
 /// SurvivalJudge 규칙으로 승자를 정한다 (먼저 떨어진 사람보다 높이 쌓는 순간 승리).
 /// </summary>
-public sealed class StackRules : ServerGame
+internal sealed class StackRules : RoundRules
 {
     const float BaseWidth = 300f;
     const int MaxLevel = 80;
@@ -19,22 +20,22 @@ public sealed class StackRules : ServerGame
     readonly bool[] done = new bool[2];
     readonly SurvivalJudge judge = new();
 
-    public StackRules(IGameHost host) : base(host) { }
+    public StackRules(IRoundHost host) : base(host) { }
 
-    public override bool OnPlayerAction(int p, int kind, ref int a, ref float f, out string reject)
+    public override Verdict OnPlayerAction(int p, int kind, ref int a, ref float f, out string why)
     {
-        if (done[p]) return Fail(out reject, "이미 끝난 탑");
+        if (done[p]) return Reject(out why, "이미 끝난 탑");
         switch (kind)
         {
-            case G1Game.StackPlace:
+            case Reaction1.StackPlace:
             {
                 int lv = a / 100000;
                 float nl = a % 100000 - 50000f;
                 float w = f;
-                if (lv != level[p] + 1) return Fail(out reject, $"층 건너뜀 ({level[p]} → {lv})");
-                if (!(w > 1f) || w > width[p] + 0.5f) return Fail(out reject, $"블럭 폭이 이상함 ({width[p]:0.#} → {w:0.#})");
+                if (lv != level[p] + 1) return Reject(out why, $"층 건너뜀 ({level[p]} → {lv})");
+                if (!(w > 1f) || w > width[p] + 0.5f) return Reject(out why, $"블럭 폭이 이상함 ({width[p]:0.#} → {w:0.#})");
                 if (nl < left[p] - Tolerance || nl + w > left[p] + width[p] + Tolerance)
-                    return Fail(out reject, "아래 블럭 밖에 놓임");
+                    return Reject(out why, "아래 블럭 밖에 놓임");
 
                 level[p] = lv;
                 left[p] = nl;
@@ -49,19 +50,19 @@ public sealed class StackRules : ServerGame
                 break;
             }
 
-            case G1Game.StackFail:
-                if (a != level[p]) return Fail(out reject, $"층 불일치 (서버 {level[p]}, 클라 {a})");
+            case Reaction1.StackFail:
+                if (a != level[p]) return Reject(out why, $"층 불일치 (서버 {level[p]}, 클라 {a})");
                 done[p] = true;
                 judge.Out[p] = true;
                 Host.Note($"P{p + 1} {level[p]}층에서 실패");
                 break;
 
             default:
-                return Fail(out reject, $"알 수 없는 액션 {kind}");
+                return Reject(out why, $"알 수 없는 액션 {kind}");
         }
 
         int w2 = judge.Check();
         if (w2 >= 0) Win(w2, $"{level[0]}층 : {level[1]}층");
-        return Ok(out reject);
+        return Relay(out why);
     }
 }

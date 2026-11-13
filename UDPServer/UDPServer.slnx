@@ -1,4 +1,3 @@
 <Solution>
   <Project Path="UDPServer/UDPServer.csproj" />
-  <Project Path="Group1Server/Group1Server.csproj" />
 </Solution>

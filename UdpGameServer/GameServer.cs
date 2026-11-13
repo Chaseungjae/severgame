@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using MiniParty.Server.Games;
 using MiniParty.Udp;
 
 namespace MiniParty.Server
@@ -49,19 +50,25 @@ namespace MiniParty.Server
             try { socket.IOControl(UdpWire.SIO_UDP_CONNRESET, new byte[4], null); } catch { /* not Windows */ }
             try
             {
-                socket.Bind(new IPEndPoint(IPAddress.Any, options.Port));
+                socket.Bind(new IPEndPoint(options.Bind, options.Port));
             }
             catch (SocketException e)
             {
-                Log.Line($"포트 {options.Port} 를 열 수 없어요: {e.SocketErrorCode} (이미 실행 중인 서버가 있나요?)");
+                string why = e.SocketErrorCode == SocketError.AddressAlreadyInUse ? "이미 이 포트를 쓰는 프로그램(서버)이 있어요"
+                    : e.SocketErrorCode == SocketError.AddressNotAvailable ? "이 PC의 IP 주소가 아니에요"
+                    : e.SocketErrorCode.ToString();
+                Log.Line($"{options.Bind}:{options.Port} 에서 서버를 열 수 없어요: {why}");
                 return 1;
             }
 
-            Log.Line($"MiniParty 3조 보드게임 UDP 서버 시작 — 포트 {options.Port} (프로토콜 {UdpWire.Version})");
-            Log.Line("서버가 방장: 미니게임 추첨 · 수 검증 · 승패 · 데미지를 서버가 정합니다");
-            Log.Line($"게임에서 [온라인 1:1] → [IP / 서버 연결] → [UDP 서버 접속] 에 입력할 주소: {string.Join(", ", LocalAddresses())}");
+            bool any = options.Bind.Equals(IPAddress.Any);
+            Log.Line($"MiniParty UDP 게임 서버 시작 — {(any ? "모든 주소" : options.Bind.ToString())} : 포트 {options.Port} (프로토콜 {UdpWire.Version})");
+            Log.Line($"진행하는 미니게임: {string.Join(" + ", Array.ConvertAll(options.Groups, Catalog.GroupName))} (방마다 첫 접속자의 씬 기준)");
+            Log.Line("서버가 방장: 미니게임 추첨 · 입력 검증 · 승패 · 데미지를 서버가 정합니다");
+            string address = any ? string.Join(", ", LocalAddresses()) : options.Bind.ToString();
+            Log.Line($"게임에서 [온라인 1:1] → [IP / 서버 연결] → [UDP 서버 접속] 에 입력할 주소: {address} (포트 {options.Port})");
             if (options.FixedDamage > 0) Log.Line($"[테스트] 라운드 데미지 {options.FixedDamage} 고정");
-            if (options.ForcedGame >= 0) Log.Line($"[테스트] 미니게임 #{options.ForcedGame} 만 진행");
+            if (options.ForcedGame >= 0) Log.Line($"[테스트] 미니게임 {Catalog.Name(options.ForcedGame)} (#{options.ForcedGame}) 만 진행");
             if (options.LossPercent > 0) Log.Line($"[테스트] 받은 패킷의 {options.LossPercent}% 를 일부러 버립니다 (재전송 확인용)");
             Log.Line("종료: Ctrl+C");
 
@@ -157,7 +164,8 @@ namespace MiniParty.Server
                         Reject(c, "VERSION", $"버전 불일치 ({(f.Length > 1 ? f[1] : "?")} ≠ {UdpWire.Version})");
                         return;
                     }
-                    Join(c, f[2].Trim().ToUpperInvariant());
+                    // HELLO|version|room|groups — groups = the client's scene ("1", "3", "1,3"; empty = every server group)
+                    Join(c, f[2].Trim().ToUpperInvariant(), RoomGroups(f.Length > 3 ? f[3] : ""));
                     break;
                 case "PING":
                     c.Channel.SendUnreliable("PONG");
@@ -171,13 +179,24 @@ namespace MiniParty.Server
             }
         }
 
-        private void Join(Client c, string roomName)
+        /// <summary>The client's groups limited to what this server was started with (--groups).</summary>
+        private int[] RoomGroups(string requested)
+        {
+            var asked = Catalog.ParseGroups(requested);
+            var groups = Array.FindAll(asked, g => Array.IndexOf(options.Groups, g) >= 0);
+            return groups.Length > 0 ? groups : options.Groups;
+        }
+
+        private void Join(Client c, string roomName, int[] groups)
         {
             Room room;
+            string key = string.Join(",", groups);
             if (roomName.Length > 0)
             {
                 if (!rooms.TryGetValue(roomName, out room))
-                    rooms[roomName] = room = new Room(this, roomName, named: true);
+                    rooms[roomName] = room = new Room(this, roomName, named: true, groups);
+                else if (room.GroupKey != key)
+                    Log.Line($"방 {roomName}: 늦게 온 {c.EndPoint} 의 씬({key})은 무시하고 방 설정({room.GroupKey})으로 진행");
                 if (!room.Open)
                 {
                     Reject(c, "FULL", $"방 {roomName} 이(가) 꽉 찼거나 경기 중");
@@ -186,11 +205,12 @@ namespace MiniParty.Server
             }
             else
             {
-                room = rooms.Values.FirstOrDefault(r => !r.Named && r.Open && r.Count == 1);
+                // quick match: pair players whose scenes play the same groups
+                room = rooms.Values.FirstOrDefault(r => !r.Named && r.Open && r.Count == 1 && r.GroupKey == key);
                 if (room == null)
                 {
                     string id = "Q" + (++quickRooms);
-                    rooms[id] = room = new Room(this, id, named: false);
+                    rooms[id] = room = new Room(this, id, named: false, groups);
                 }
             }
 
@@ -198,7 +218,7 @@ namespace MiniParty.Server
             c.Room = room;
             c.Index = slot;
             c.Channel.SendReliable($"WELCOME|{slot}|{room.Id}", Now);
-            Log.Line($"입장 {c.EndPoint} → 방 {room.Id} P{slot + 1} ({room.Count}/2)");
+            Log.Line($"입장 {c.EndPoint} → 방 {room.Id} P{slot + 1} ({room.Count}/2, 미니게임 {string.Join("+", Array.ConvertAll(room.Groups, g => g + "조"))})");
 
             if (room.Count == 2)
             {

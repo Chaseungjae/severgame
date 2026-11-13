@@ -9,16 +9,16 @@ namespace MiniParty.EditorTools
         [MenuItem("MiniParty/Test/조별 미니게임 목록")]
         static void Groups()
         {
-            int keep = MiniGameRegistry.ActiveGroup;
-            for (int g = 1; g <= 4; g++)
+            var keep = MiniGameRegistry.ActiveGroups;
+            foreach (var scene in new[] { "Group1_Reaction", "Group2_Brain", "Group3_Board", "Group4_Action", "Group13_Combined" })
             {
-                MiniGameRegistry.ActiveGroup = g;
+                MiniGameRegistry.ActiveGroups = MiniGameRegistry.GroupsFromSceneName(scene);
                 var names = new System.Collections.Generic.List<string>();
                 foreach (int i in MiniGameRegistry.ShuffledDeck()) names.Add(MiniGameRegistry.Games[i].Title);
                 names.Sort();
-                Debug.Log($"[조별] {MiniGameRegistry.GroupNames[g]}: {string.Join(", ", names)}");
+                Debug.Log($"[조별] {scene} ({MiniGameRegistry.ActiveGroupLabel()}): {string.Join(", ", names)}");
             }
-            MiniGameRegistry.ActiveGroup = keep;
+            MiniGameRegistry.ActiveGroups = keep;
         }
 
         static int n;

@@ -60,15 +60,20 @@ namespace MiniParty.Udp
                 Debug.LogError($"[UDP] 미니게임 목록이 서버 규격(BoardProtocol.cs)과 달라요: {drift}");
                 return;
             }
-            channel.SendReliable($"HELLO|{UdpWire.Version}|{room}", Now);
-            Debug.Log($"[UDP] 서버 {Server} 에 접속 요청 (방: {(room.Length > 0 ? room : "빠른 매칭")})");
+            // groups = this scene's minigame groups (1조 씬 "1", 통합 씬 "1,3", 메인 씬 "" = 서버가 가진 전부)
+            string groups = string.Join(",", MiniGameRegistry.ActiveGroups);
+            channel.SendReliable($"HELLO|{UdpWire.Version}|{room}|{groups}", Now);
+            Debug.Log($"[UDP] 서버 {Server} 에 접속 요청 (방: {(room.Length > 0 ? room : "빠른 매칭")}, 미니게임 조: {(groups.Length > 0 ? groups : "서버 전체")})");
         }
 
-        /// <summary>The server refers to 3조 games by registry index: make sure they still point at the same games.</summary>
+        /// <summary>The server refers to 1조 / 3조 games by registry index: make sure they still point at the same games.</summary>
         static bool CheckRegistry(out string drift)
         {
             var expected = new (int Index, Type Type)[]
             {
+                (Reaction1.SpaceTug, typeof(SpaceTugGame)), (Reaction1.Cps, typeof(CpsGame)),
+                (Reaction1.F1Reaction, typeof(F1ReactionGame)), (Reaction1.Aim, typeof(AimGame)),
+                (Reaction1.Stack, typeof(StackGame)), (Reaction1.Timing, typeof(TimingGame)),
                 (Board3.ConnectFour, typeof(ConnectFourGame)), (Board3.Othello, typeof(OthelloGame)),
                 (Board3.Circle, typeof(CircleGame)), (Board3.Typing, typeof(TypingGame)), (Board3.Yacht, typeof(YachtGame)),
             };

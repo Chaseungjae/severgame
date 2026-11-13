@@ -47,7 +47,7 @@ namespace MiniParty.Server.Games
             Host.Note($"선공 P{PlayerOf(Black) + 1}");
         }
 
-        public override Verdict OnPlayerAction(int p, int kind, int a, float f, out string why)
+        public override Verdict OnPlayerAction(int p, int kind, ref int a, ref float f, out string why)
         {
             if (Decided) return Reject(out why, "이미 끝난 판");
             if (kind != Board3.BoardMove) return Reject(out why, $"보드게임에 없는 액션 {kind}");

@@ -38,7 +38,7 @@ namespace MiniParty.Server.Games
             if (r > 1) Host.Note($"완전히 같은 패 — 다시 굴림 ({r}번째)");
         }
 
-        public override Verdict OnPlayerAction(int p, int kind, int a, float f, out string why)
+        public override Verdict OnPlayerAction(int p, int kind, ref int a, ref float f, out string why)
         {
             if (Decided || pendingAt >= 0) return Reject(out why, "결과 발표 중");
             if (a >> 20 != round) return Reject(out why, $"다른 판의 입력 ({a >> 20} ≠ {round})");
