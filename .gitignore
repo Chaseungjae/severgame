@@ -34,10 +34,6 @@
 ExportedObj/
 .consulo/
 
-# UDP 게임 서버(.NET 콘솔): 위의 *.csproj 는 Unity 가 만드는 파일용이라 서버 프로젝트 파일은 예외로 올린다
-!UDPServer/**/*.csproj
-UDPServer/**/bin/Release/
-
 # Crash reports / misc
 sysinfo.txt
 crashlytics-build.properties
@@ -60,3 +56,11 @@ desktop.ini
 # Unity crash recovery scenes
 Assets/_Recovery/
 Assets/_Recovery.meta
+
+# dedicated UDP game server build output
+UdpGameServer/bin/
+UdpGameServer/obj/
+
+# 1조 전용 UDP 서버 (UDPServer/Group1Server): 프로젝트 파일은 올리고 빌드 결과는 올리지 않는다
+!UDPServer/Group1Server/Group1Server.csproj
+UDPServer/Group1Server/bin/

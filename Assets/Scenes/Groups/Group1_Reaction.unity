@@ -371,6 +371,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MiniParty.GameManager
   minDamage: 25
   maxDamage: 35
+  testDamageOne: 1
   p1Cpu: 0
   p2Cpu: 0
 --- !u!4 &832881705

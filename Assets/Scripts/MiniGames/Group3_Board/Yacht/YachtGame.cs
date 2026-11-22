@@ -29,6 +29,8 @@ namespace MiniParty
         const int ActHold = 3;       // player: A = round << 20 | held
         const int ActDone = 4;       // player: A = round << 20 | dice
         const int ActResult = 5;     // system: A = winner, -1 = tie (re-roll)
+        const int ActRollRequest = 6; // player → authority only: A = round << 20 | held. The authority rolls and
+                                      // emits ActRoll, so dice can't be faked (online the host / the UDP server rolls)
 
         static readonly string Legend = "야추 > 포카드 > 라지 스트레이트 > 풀하우스 > 스몰 스트레이트 > 트리플 > 투 페어 > 원 페어";
 
@@ -51,6 +53,7 @@ namespace MiniParty
             public bool[] Held = new bool[DiceCount];
             public int RollsUsed;
             public bool Done, Animating;
+            public bool Requested; // asked the authority for a roll, waiting for the result
             public float Elapsed, CpuNext;
             public Coroutine Anim;
         }
@@ -207,40 +210,8 @@ namespace MiniParty
             for (int i = 0; i < DiceCount; i++) v[i] = (a >> (i * 3)) & 7;
         }
 
-        /// <summary>Comparable hand strength: rank, then the dice that make the hand, then the total.</summary>
-        public static int Score(int[] v, out string name)
-        {
-            var count = new int[7];
-            int sum = 0;
-            foreach (int x in v) { count[x]++; sum += x; }
-
-            int four = 0, three = 0, highPair = 0, lowPair = 0, five = 0;
-            for (int f = 6; f >= 1; f--)
-            {
-                if (count[f] == 5) five = f;
-                else if (count[f] == 4) four = f;
-                else if (count[f] == 3) three = f;
-                else if (count[f] == 2) { if (highPair == 0) highPair = f; else lowPair = f; }
-            }
-            int run = 0, bestRun = 0, runHigh = 0;
-            for (int f = 1; f <= 6; f++)
-            {
-                run = count[f] > 0 ? run + 1 : 0;
-                if (run >= bestRun) { bestRun = run; runHigh = f; }
-            }
-
-            int rank, key;
-            if (five > 0) { rank = 8; key = five; name = "야추!"; }
-            else if (four > 0) { rank = 7; key = four; name = "포카드"; }
-            else if (bestRun >= 5) { rank = 6; key = runHigh; name = "라지 스트레이트"; }
-            else if (three > 0 && highPair > 0) { rank = 5; key = three * 10 + highPair; name = "풀하우스"; }
-            else if (bestRun >= 4) { rank = 4; key = runHigh; name = "스몰 스트레이트"; }
-            else if (three > 0) { rank = 3; key = three; name = "트리플"; }
-            else if (lowPair > 0) { rank = 2; key = highPair * 10 + lowPair; name = "투 페어"; }
-            else if (highPair > 0) { rank = 1; key = highPair; name = "원 페어"; }
-            else { rank = 0; key = 0; name = "노 페어"; }
-            return rank * 100000 + key * 100 + sum;
-        }
+        /// <summary>Comparable hand strength (shared with the UDP server: Net/UdpServer/BoardProtocol.cs).</summary>
+        public static int Score(int[] v, out string name) => Udp.YachtHands.Score(v, out name);
 
         static int Rank(int score) => score / 100000;
 
@@ -276,7 +247,7 @@ namespace MiniParty
                     {
                         var l = lanes[q];
                         done[q] = false;
-                        l.Done = l.Animating = false;
+                        l.Done = l.Animating = l.Requested = false;
                         l.RollsUsed = 0;
                         l.Elapsed = 0f;
                         l.CpuNext = Random.Range(0.8f, 1.4f);
@@ -295,6 +266,7 @@ namespace MiniParty
                 {
                     if (p < 0 || p > 1 || r != round || done[p]) return;
                     var l = lanes[p];
+                    l.Requested = false;
                     int held = payload >> 15;
                     for (int i = 0; i < DiceCount; i++) l.Held[i] = (held >> i & 1) == 1;
                     Unpack(payload & 0x7FFF, l.Values);
@@ -303,6 +275,14 @@ namespace MiniParty
                     ShowHolds(l);
                     if (l.Anim != null) StopCoroutine(l.Anim);
                     l.Anim = StartCoroutine(RollAnimation(p));
+                    break;
+                }
+
+                case ActRollRequest:
+                {
+                    if (!IsAuthority || p < 0 || p > 1 || r != round || done[p] || resolved) return;
+                    if (lanes[p].RollsUsed >= MaxRolls) return;
+                    Emit(ActRoll, p, RollDice(lanes[p], payload & 31));
                     break;
                 }
 
@@ -422,22 +402,34 @@ namespace MiniParty
         void Roll(int p)
         {
             var l = lanes[p];
-            if (!Running || !IsLocal(p) || l.Done || l.Animating || l.RollsUsed >= MaxRolls || resolved) return;
+            if (!Running || !IsLocal(p) || l.Done || l.Animating || l.Requested || l.RollsUsed >= MaxRolls || resolved) return;
             int held = 0;
+            for (int i = 0; i < DiceCount; i++)
+                if (l.RollsUsed > 0 && l.Held[i]) held |= 1 << i;
+            if (IsAuthority)
+            {
+                Emit(ActRoll, p, RollDice(l, held));
+                return;
+            }
+            // not the authority: ask for the roll (only sent, the result comes back as ActRoll)
+            l.Requested = true;
+            Net.SendAction(new GameAction { Kind = ActRollRequest, Player = p, A = round << 20 | held });
+        }
+
+        /// <summary>Authority: new dice for a lane, keeping the held ones. Returns the ActRoll payload.</summary>
+        int RollDice(Lane l, int held)
+        {
+            if (l.RollsUsed == 0) held = 0;
             var next = new int[DiceCount];
             for (int i = 0; i < DiceCount; i++)
-            {
-                bool keep = l.RollsUsed > 0 && l.Held[i];
-                if (keep) held |= 1 << i;
-                next[i] = keep ? l.Values[i] : Random.Range(1, 7);
-            }
-            Emit(ActRoll, p, round << 20 | held << 15 | Pack(next));
+                next[i] = (held >> i & 1) == 1 ? l.Values[i] : Random.Range(1, 7);
+            return round << 20 | held << 15 | Pack(next);
         }
 
         void ToggleHold(int p, int i)
         {
             var l = lanes[p];
-            if (!Running || !IsLocal(p) || l.Done || l.Animating || l.RollsUsed == 0 || l.RollsUsed >= MaxRolls) return;
+            if (!Running || !IsLocal(p) || l.Done || l.Animating || l.Requested || l.RollsUsed == 0 || l.RollsUsed >= MaxRolls) return;
             l.Held[i] = !l.Held[i];
             if (IsHumanHere(p)) Sfx.Toggle();
             ShowHolds(l);
@@ -449,7 +441,7 @@ namespace MiniParty
         void Finish(int p)
         {
             var l = lanes[p];
-            if (!Running || !IsLocal(p) || l.Done || l.Animating || l.RollsUsed == 0 || resolved) return;
+            if (!Running || !IsLocal(p) || l.Done || l.Animating || l.Requested || l.RollsUsed == 0 || resolved) return;
             Emit(ActDone, p, round << 20 | Pack(l.Values));
         }
 
@@ -489,7 +481,7 @@ namespace MiniParty
         void UpdateCpu(int p)
         {
             var l = lanes[p];
-            if (l.Animating) return;
+            if (l.Animating || l.Requested) return;
             l.CpuNext -= Time.deltaTime;
             if (l.CpuNext > 0f) return;
             l.CpuNext = Random.Range(0.9f, 1.5f);

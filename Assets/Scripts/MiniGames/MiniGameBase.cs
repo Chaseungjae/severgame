@@ -5,6 +5,13 @@ using UnityEngine.UI;
 
 namespace MiniParty
 {
+    /// <summary>A gameplay event. Player = -1 for system events decided by the authority.</summary>
+    public struct GameAction
+    {
+        public int Kind, Player, A;
+        public float F;
+    }
+
     /// <summary>Network hook for minigames. Null when playing locally on one PC.</summary>
     public interface INetLink
     {
@@ -12,10 +19,6 @@ namespace MiniParty
         int LocalIndex { get; }
         bool Disconnected { get; }
         void SendAction(GameAction action);
-        /// <summary>Online: the server decides the winner. Only games without server rules report one.</summary>
-        void ClaimWinner(int player);
-        /// <summary>Online: logs a raw input on the server terminal only (never relayed to the opponent).</summary>
-        void ReportInput(GameAction input);
     }
 
     /// <summary>
@@ -85,13 +88,6 @@ namespace MiniParty
             Handle(act);
         }
 
-        /// <summary>
-        /// Online only: tells the server about an input that is not an action (e.g. a digit typed before confirming),
-        /// so the server terminal shows every input. The opponent never receives it.
-        /// </summary>
-        protected void ReportInput(int kind, int player, int a = 0, float f = 0f) =>
-            Net?.ReportInput(new GameAction { Kind = kind, Player = player, A = a, F = f });
-
         /// <summary>Called by the network layer with the opponent's actions.</summary>
         public void ReceiveAction(GameAction act) => Handle(act);
 
@@ -105,20 +101,13 @@ namespace MiniParty
             OnAction(act);
         }
 
-        /// <summary>
-        /// Authority only. Offline this ends the round; online it only reports to the server, which confirms the
-        /// winner for both PCs (see <see cref="ForceWinner"/>).
-        /// </summary>
+        /// <summary>Authority only: ends the game for everyone.</summary>
         protected void DeclareWinner(int player)
         {
             if (!IsAuthority || winnerSent) return;
             winnerSent = true;
-            if (Net == null) Handle(new GameAction { Kind = KindWinner, Player = -1, A = player });
-            else Net.ClaimWinner(player);
+            Emit(KindWinner, -1, player);
         }
-
-        /// <summary>Called by the network layer when the server announced the round's winner.</summary>
-        public void ForceWinner(int player) => Handle(new GameAction { Kind = KindWinner, Player = -1, A = player });
 
         // ---------- input for the player controlled on this machine ----------
         // One PC = one human player, so every key set works for them: WASD or arrows, Space or Enter, left click.
@@ -301,10 +290,34 @@ namespace MiniParty
         public static readonly string[] GroupNames = { "전체", Group1Games.Name, Group2Games.Name, Group3Games.Name, Group4Games.Name };
 
         /// <summary>
-        /// 0 = every game. 1-4 = only that group's games (set by GameManager when a Groups/GroupN_* scene is open,
-        /// so each group can test their own games without touching the main scene).
+        /// Empty = every game. {1} = only 1조's games, {1, 3} = 1조 + 3조 ... Set by GameManager from the scene name:
+        /// Groups/Group1_Reaction → {1}, Groups/Group13_Combined → {1, 3} (each digit after "Group" is a group),
+        /// so groups can test their own games without touching the main scene.
         /// </summary>
-        public static int ActiveGroup;
+        public static int[] ActiveGroups = new int[0];
+
+        /// <summary>"Group13_Combined" → {1, 3}; any other scene name → empty (every game).</summary>
+        public static int[] GroupsFromSceneName(string scene)
+        {
+            var groups = new System.Collections.Generic.List<int>();
+            if (scene != null && scene.StartsWith("Group"))
+                for (int i = 5; i < scene.Length && char.IsDigit(scene[i]); i++)
+                {
+                    int g = scene[i] - '0';
+                    if (g >= 1 && g < GroupNames.Length && !groups.Contains(g)) groups.Add(g);
+                }
+            return groups.ToArray();
+        }
+
+        /// <summary>"1조 · 반응·연타 + 3조 · 보드·턴제" for the active groups, or null when every game is on.</summary>
+        public static string ActiveGroupLabel() =>
+            ActiveGroups.Length == 0 ? null : string.Join(" + ", Array.ConvertAll(ActiveGroups, g => GroupNames[g]));
+
+        /// <summary>
+        /// 테스트용: 0 이상이면 라운드마다 이 게임(Games 번호)만 나온다.
+        /// 온라인에서는 게임을 고르는 쪽(방장)에서만 효과가 있으므로 양쪽이 어긋나지 않는다.
+        /// </summary>
+        public static int ForcedGame = -1;
 
         static (string, Type)[] Concat(params (string, Type)[][] lists)
         {
@@ -325,8 +338,13 @@ namespace MiniParty
         static System.Collections.Generic.List<int> Pool()
         {
             var pool = new System.Collections.Generic.List<int>();
+            if (ForcedGame >= 0 && ForcedGame < Games.Length)
+            {
+                pool.Add(ForcedGame);
+                return pool;
+            }
             for (int i = 0; i < Games.Length; i++)
-                if (ActiveGroup == 0 || GroupOf[i] == ActiveGroup) pool.Add(i);
+                if (ActiveGroups.Length == 0 || Array.IndexOf(ActiveGroups, GroupOf[i]) >= 0) pool.Add(i);
             if (pool.Count == 0) for (int i = 0; i < Games.Length; i++) pool.Add(i);
             return pool;
         }

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>UdpGameServer</AssemblyName>
+    <RootNamespace>MiniParty.Server</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- run on a newer .NET runtime too (e.g. a PC with only .NET 10 installed); game builds ship a self-contained exe -->
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- the exact files the Unity client uses: packet format, reliability, 3조 game numbers / action kinds / yacht hands -->
+    <Compile Include="..\Assets\Scripts\Net\UdpServer\UdpProtocol.cs" Link="Shared\UdpProtocol.cs" />
+    <Compile Include="..\Assets\Scripts\Net\UdpServer\BoardProtocol.cs" Link="Shared\BoardProtocol.cs" />
+  </ItemGroup>
+
+</Project>
