@@ -64,10 +64,10 @@
 - P2P(초대코드·로컬 플레이)는 방장이 P1이며 미니게임 추첨·승패·데미지를 결정합니다. UDP 게임 서버에선 서버가 결정합니다.
 - 한 PC에서 두 개를 띄워 테스트: 빌드 후 `MiniParty.exe -autohost -autoplay` 와 `MiniParty.exe -autojoin 127.0.0.1 -autoplay`.
 
-## UDP 게임 서버 (`UdpGameServer/`) — 1조 반응·연타 + 3조 보드게임
+## UDP 게임 서버 (`UdpGameServer/`) — 1조 반응·연타 + 2조 두뇌·관찰 + 3조 보드게임
 
 직접 만든 C# UDP 서버가 **방장(판정자)** 입니다. 두 클라이언트는 둘 다 손님이고, 서버가 미니게임 추첨 · 입력 검증 · 승패 · 데미지/HP를 정합니다.
-방마다 **첫 접속자의 씬**에 따라 나오는 게임이 정해집니다: 1조 씬 → 1조 게임, 3조 씬 → 3조 게임, 1·3조 통합 씬·메인 씬 → 1조 + 3조.
+방마다 **첫 접속자의 씬**에 따라 나오는 게임이 정해집니다: 1조 씬 → 1조 게임, 2조 씬 → 2조 게임, 3조 씬 → 3조 게임, 1·3조 통합 씬 → 1조 + 3조, 메인 씬 → 1조 + 2조 + 3조.
 
 | 게임 | 서버가 하는 일 (`UdpGameServer/Games/`) |
 |---|---|
@@ -75,6 +75,11 @@
 | CPS 클릭 대결 | 클릭을 서버가 직접 세고(초당 25회 제한) 상대에게도 서버 값 전달, 동점은 마지막 클릭 시각 |
 | F1 반응 속도 | 히트 시작·대기 시간을 서버가 정함, 불가능한 반응 시간 거절, 부정출발·2승 판정 |
 | 에임 대결 | 표적 번호·반응 시간 검증, 명중 수를 서버가 집계 |
+| 1 to 50 | 플레이어마다 다음 숫자를 서버가 세고 순서가 아닌 입력 거절, 50을 먼저 누른 사람 승리 |
+| 공 개수 세기 | **판을 서버가 진행** (같은 시드로 정답을 서버가 계산), 더 가까운 답 → 먼저 확정 순 판정, 답이 안 오면 0개 처리, 3판 2선승 |
+| 색깔 찾기 | 단계·실수를 서버가 직접 세고 클라이언트 값이 다르면 서버 값 사용, 단계 → 실수 → 추첨 판정 |
+| 순간 기억력 | 자릿수·목숨을 서버가 관리, 탈락·기록 비교 판정 |
+| 10초 맞추기 | **판을 서버가 진행**, 멈춘 시간 범위 검사, 10.00초에 더 가까운 쪽 판정, 3판 2선승 |
 | 블럭 쌓기 · 타이밍 서바이벌 | 층/레벨이 한 칸씩 오르는지, 블럭 폭·위치·목숨이 말이 되는지 검사, 버티기 판정 |
 | 사목 | 차례·둘 수 있는 줄 검사, 4목 판정, 가득 차면 추첨, 응답 없는 플레이어는 서버가 대신 둠 |
 | 오델로 | 뒤집기가 되는 자리만 허용, 패스·종료·돌 개수 판정 |
@@ -85,17 +90,19 @@
 - **게임에서 열기**: `[내가 방 열기]` — 에디터에선 `dotnet build`로 서버를 빌드해서 실행(.NET SDK 필요), 빌드본에선 `Server/UdpGameServer.exe`를 실행합니다.
 - **직접 실행**: `cd UdpGameServer` → `dotnet run -c Release`
   - 옵션: `[포트] [--bind IP] [--public IP] [--groups 1,3] [--damage N] [--game N] [--loss N] [--quiet]` — 기본 포트 **7780**,
-    `--bind`는 그 IP로만 열기, `--public IP`는 서버 창에 공인 IP·포트포워딩 안내 표시, `--groups`는 서버가 진행할 조, `--game 0~5 / 11~15`는 한 게임만, `--loss N`은 받은 패킷 N%를 일부러 버리는 테스트
+    `--bind`는 그 IP로만 열기, `--public IP`는 서버 창에 공인 IP·포트포워딩 안내 표시, `--groups`는 서버가 진행할 조, `--game 0~5 / 6~10 / 11~15`는 한 게임만, `--loss N`은 받은 패킷 N%를 일부러 버리는 테스트
 - **구조**
   - `Assets/Scripts/Net/UdpServer/UdpProtocol.cs` — 패킷 규격 + 신뢰성(순번·ACK·재전송·순서 보장)
   - `Assets/Scripts/Net/UdpServer/BoardProtocol.cs` — 1조(`Reaction1`)·3조(`Board3`) 게임 번호·액션 번호, 야추 족보 계산
-  - 위 두 파일은 **서버와 Unity가 같은 파일을 컴파일**합니다. 게임 스크립트의 액션 번호를 바꾸면 여기도 같이 바꾸세요 (게임 번호가 어긋나면 접속 시 Unity가 거절).
+  - `Assets/Scripts/Net/UdpServer/BrainProtocol.cs` — 2조 게임 번호·액션 번호, 공 개수 세기 문제 생성(서버 정답 확인용)
+  - 위 세 파일은 **서버와 Unity가 같은 파일을 컴파일**합니다. 게임 스크립트의 액션 번호를 바꾸면 여기도 같이 바꾸세요 (게임 번호가 어긋나면 접속 시 Unity가 거절).
   - `UdpServerLink.cs` — Unity 클라이언트, `NetSession`의 `Mode.UdpServer` — 기존 온라인 흐름(로비 → 라운드 → 결과)을 그대로 사용
   - `LocalUdpServer.cs` — `[내가 방 열기]`가 서버 프로그램을 콘솔 창으로 띄우고, 경기가 끝나거나 게임을 끄면 닫음
   - `UdpGameServer/Room.cs` — 경기 흐름(캐릭터 교환 → StartRound → Barrier/Go → 판정 → RoundResult)
-  - `Games/Reaction/*Rules.cs` — 1조 규칙, `Games/BoardRules.cs` 등 — 3조 규칙
+  - `Games/Reaction/*Rules.cs` — 1조 규칙, `Games/Brain/BrainRules.cs` — 2조 규칙, `Games/BoardRules.cs` 등 — 3조 규칙
+  - 2조 게임은 서버 터미널에 **모든 입력**을 한국어로 남깁니다 (확정 전 숫자 입력까지, `Games/Brain/BrainLog.cs`). 이 입력 보고는 상대에게 가지 않아요.
 - **조 씬 빌드** (서버 exe 포함): `MiniParty > Build > Windows - 1·3조 통합 씬 (UDP 서버 테스트)` → `Builds/MiniParty_Group13/`,
-  `... - 3조 씬` → `Builds/MiniParty_Group3/`
+  `... - 2조 씬` → `Builds/MiniParty_Group2/`, `... - 3조 씬` → `Builds/MiniParty_Group3/`
 - **자동 테스트**: `MiniParty.exe -hostserver 127.0.0.1:7780 -autoplay` (서버 열고 입장) + `MiniParty.exe -udpjoin 127.0.0.1:7780 -autoplay` → CPU끼리 서버를 거쳐 대전.
 
 ## 빌드

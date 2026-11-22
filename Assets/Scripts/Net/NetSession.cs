@@ -22,6 +22,7 @@ namespace MiniParty
         Go,             // host → client : A = barrier tag
         Action,         // both ways     : A = kind, B = player, C = value, D = round, F = float value
         RoundResult,    // host → client : A = winner, B = damage
+        Input,          // client → UDP server only: A = kind, B = player, C = value, D = round, F — logged, never relayed
     }
 
     public struct NetMsg
@@ -441,6 +442,13 @@ namespace MiniParty
         public void SendAction(GameAction act)
         {
             Send(new NetMsg { Type = MsgType.Action, A = act.Kind, B = act.Player, C = act.A, D = CurrentRound, F = act.F });
+        }
+
+        /// <summary>UDP 게임 서버에만: 서버 터미널 기록용 입력 (P2P 에서는 상대가 받을 필요가 없어 보내지 않음).</summary>
+        public void ReportInput(GameAction input)
+        {
+            if (udp == null) return;
+            Send(new NetMsg { Type = MsgType.Input, A = input.Kind, B = input.Player, C = input.A, D = CurrentRound, F = input.F });
         }
 
         public bool TryTake(MsgType type, out NetMsg msg, int? a = null)

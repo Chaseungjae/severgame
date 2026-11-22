@@ -50,6 +50,11 @@ namespace MiniParty.Server.Games
             Reaction1.Aim => new AimRules(host),
             Reaction1.Stack => new StackRules(host),
             Reaction1.Timing => new TimingRules(host),
+            BrainProtocol.OneToFiftyIndex => new OneToFiftyRules(host),
+            BrainProtocol.BallCountIndex => new BallCountRules(host),
+            BrainProtocol.ColorsIndex => new ColorRules(host),
+            BrainProtocol.MemoryIndex => new MemoryRules(host),
+            BrainProtocol.TenSecondsIndex => new TenSecondsRules(host),
             Board3.ConnectFour => new ConnectFourRules(host),
             Board3.Othello => new OthelloRules(host),
             Board3.Circle => new CircleRules(host),
@@ -107,6 +112,11 @@ namespace MiniParty.Server.Games
             Reaction1.Aim => "에임 대결",
             Reaction1.Stack => "블럭 쌓기",
             Reaction1.Timing => "타이밍 서바이벌",
+            BrainProtocol.OneToFiftyIndex => "1 to 50",
+            BrainProtocol.BallCountIndex => "공 개수 세기",
+            BrainProtocol.ColorsIndex => "색깔 찾기",
+            BrainProtocol.MemoryIndex => "순간 기억력",
+            BrainProtocol.TenSecondsIndex => "10초 맞추기",
             Board3.ConnectFour => "사목",
             Board3.Othello => "오델로",
             Board3.Circle => "원을 그려봐요",
@@ -115,7 +125,7 @@ namespace MiniParty.Server.Games
             _ => "#" + index,
         };
 
-        public static string GroupName(int group) => group == 1 ? "1조 반응·연타" : group == 3 ? "3조 보드·턴제" : group + "조";
+        public static string GroupName(int group) => group == 1 ? "1조 반응·연타" : group == 2 ? "2조 두뇌·관찰" : group == 3 ? "3조 보드·턴제" : group + "조";
 
         public static bool IsServerGame(int index)
         {

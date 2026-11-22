@@ -10,13 +10,13 @@ namespace MiniParty.Server
     /// match: it picks the minigame, checks each input against the rules (Games/**/*Rules.cs), decides the winner,
     /// damage and HP. Each room plays the groups of the scene its first player is in (1조 / 3조 / 1·3조 통합 씬).
     ///
-    ///   UdpGameServer.exe [port] [--bind IP] [--groups 1,3] [--damage N] [--game N] [--loss N] [--quiet] [--from-game]
+    ///   UdpGameServer.exe [port] [--bind IP] [--groups 1,2,3] [--damage N] [--game N] [--loss N] [--quiet] [--from-game]
     ///     port         UDP port (default 7780)
     ///     --bind IP    only this address of the PC (default: every address). The game's [내가 방 열기] passes it.
     ///     --public IP  the router's public IP friends will type (only shown in the log, with a port-forwarding reminder)
-    ///     --groups G   groups this server may run (default 1,3)
+    ///     --groups G   groups this server may run (default 1,2,3)
     ///     --damage N   damage per lost round (default: random 25~35)
-    ///     --game N     only this minigame (registry index: 0~5 = 1조, 11~15 = 3조) — for testing one game
+    ///     --game N     only this minigame (registry index: 0~5 = 1조, 6~10 = 2조, 11~15 = 3조) — for testing one game
     ///     --loss N     drop N% of incoming packets on purpose (tests the reliable channel)
     ///     --quiet      no per-message logs
     ///     --from-game  started by the game: on an error keep the console window open so the message can be read
@@ -56,7 +56,7 @@ namespace MiniParty.Server
             options.LossPercent = Math.Clamp(options.LossPercent, 0, 90);
             if (options.Port <= 0 || options.Port > 65535) return Exit(options, $"포트 번호가 이상해요: {options.Port}");
             if (options.ForcedGame >= 0 && !Catalog.IsServerGame(options.ForcedGame))
-                return Exit(options, $"--game 은 1조 {string.Join(", ", Reaction1.Games)} / 3조 {string.Join(", ", Board3.Games)} 중 하나여야 해요");
+                return Exit(options, $"--game 은 1조 {string.Join(", ", Reaction1.Games)} / 2조 {string.Join(", ", BrainProtocol.Games)} / 3조 {string.Join(", ", Board3.Games)} 중 하나여야 해요");
 
             var server = new GameServer(options);
             Console.CancelKeyPress += (_, e) =>

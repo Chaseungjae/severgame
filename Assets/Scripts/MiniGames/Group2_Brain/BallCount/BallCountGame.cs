@@ -207,22 +207,9 @@ namespace MiniParty
             foreach (var b in balls) Destroy(b.Rt.gameObject);
             balls.Clear();
 
-            var rng = new System.Random(Seed * 31 + round);
+            // same numbers as the UDP server's answer check (BrainProtocol.BallCount.Setup)
+            var rng = BrainProtocol.BallCount.Setup(Seed, round, out askAll, out targetColor, out int total, out int count);
             float R(float a, float c) => a + (float)rng.NextDouble() * (c - a);
-
-            askAll = round == 2; // one round asks for the total
-            targetColor = rng.Next(BallColors.Length);
-            int total, count;
-            if (askAll)
-            {
-                total = rng.Next(12, 21);
-                count = total;
-            }
-            else
-            {
-                total = rng.Next(16, 27);
-                count = rng.Next(6, Mathf.Min(15, total - 5));
-            }
             correct = count;
 
             for (int i = 0; i < total; i++)

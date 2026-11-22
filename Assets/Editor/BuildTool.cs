@@ -55,6 +55,12 @@ namespace MiniParty.EditorTools
             Build("Assets/Scenes/Groups/Group13_Combined.unity", "Builds/MiniParty_Group13", ServerReadme("1조 (반응·연타) + 3조 (보드·턴제)",
                 "스페이스바 줄다리기, CPS 클릭 대결, F1 반응 속도, 에임 대결, 블럭 쌓기, 타이밍 서바이벌,\n사목, 오델로, 원을 그려봐요, 타자 대결, 야추 다이스"));
 
+        /// <summary>2조 test build: only the Group2_Brain minigames, for the UDP game server (UdpGameServer/).</summary>
+        [MenuItem("MiniParty/Build/Windows - 2조 씬 (UDP 서버 테스트)")]
+        public static void BuildGroup2() =>
+            Build("Assets/Scenes/Groups/Group2_Brain.unity", "Builds/MiniParty_Group2", ServerReadme("2조 (두뇌·관찰)",
+                "1 to 50, 공 개수 세기, 색깔 찾기, 순간 기억력, 10초 맞추기"));
+
         /// <summary>3조 test build: only the Group3_Board minigames, for the UDP game server (UdpGameServer/).</summary>
         [MenuItem("MiniParty/Build/Windows - 3조 씬 (UDP 서버 테스트)")]
         public static void BuildGroup3() =>

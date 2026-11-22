@@ -74,6 +74,9 @@ namespace MiniParty.Udp
                 (Reaction1.SpaceTug, typeof(SpaceTugGame)), (Reaction1.Cps, typeof(CpsGame)),
                 (Reaction1.F1Reaction, typeof(F1ReactionGame)), (Reaction1.Aim, typeof(AimGame)),
                 (Reaction1.Stack, typeof(StackGame)), (Reaction1.Timing, typeof(TimingGame)),
+                (BrainProtocol.OneToFiftyIndex, typeof(OneToFiftyGame)), (BrainProtocol.BallCountIndex, typeof(BallCountGame)),
+                (BrainProtocol.ColorsIndex, typeof(ColorGame)), (BrainProtocol.MemoryIndex, typeof(MemoryGame)),
+                (BrainProtocol.TenSecondsIndex, typeof(TenSecondsGame)),
                 (Board3.ConnectFour, typeof(ConnectFourGame)), (Board3.Othello, typeof(OthelloGame)),
                 (Board3.Circle, typeof(CircleGame)), (Board3.Typing, typeof(TypingGame)), (Board3.Yacht, typeof(YachtGame)),
             };

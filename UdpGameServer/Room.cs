@@ -95,6 +95,11 @@ namespace MiniParty.Server
                 case WireMsg.Action:
                     OnAction(p, msg);
                     break;
+                case WireMsg.Input:
+                    // raw input report (2조): only shown here, never relayed (it could leak an answer)
+                    if (msg.D == round && msg.B == p && rules != null && !server.Options.Quiet)
+                        Log.Line($"{Id}/P{p + 1} 입력  {Catalog.Name(gameIndex)}: {BrainLog.Input(gameIndex, msg.A, msg.C, msg.F)}");
+                    break;
                 default:
                     Note($"P{p + 1} 이(가) 보낼 수 없는 메시지 무시: {msg}");
                     break;
@@ -180,7 +185,10 @@ namespace MiniParty.Server
             foreach (var m in queued) ForEach(s => server.Send(s, m));
         }
 
-        string Describe(Msg msg) => $"{Catalog.Name(gameIndex)} {msg}";
+        string Describe(Msg msg) =>
+            msg.Type == WireMsg.Action && BrainLog.Action(gameIndex, msg.A, msg.C, msg.F) is string brain
+                ? $"{Catalog.Name(gameIndex)}: {brain}"
+                : $"{Catalog.Name(gameIndex)} {msg}";
 
         // ---------- round flow ----------
 

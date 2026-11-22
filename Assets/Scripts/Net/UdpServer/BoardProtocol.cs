@@ -11,6 +11,7 @@ namespace MiniParty.Udp
         Go,             // host → client : A = barrier tag
         Action,         // both ways     : A = kind, B = player, C = value, D = round, F = float value
         RoundResult,    // host → client : A = winner, B = damage
+        Input,          // client → server only: a raw input (2조), logged on the server terminal, never relayed
     }
 
     /// <summary>
@@ -84,10 +85,10 @@ namespace MiniParty.Udp
     /// <summary>Which minigame groups the UDP server can run (the server is the authority for these).</summary>
     public static class ServerGames
     {
-        public static readonly int[] Groups = { 1, 3 };
+        public static readonly int[] Groups = { 1, 2, 3 };
 
         /// <summary>Registry indices of one group's games, or an empty array if the server does not run that group.</summary>
-        public static int[] Of(int group) => group == 1 ? Reaction1.Games : group == 3 ? Board3.Games : new int[0];
+        public static int[] Of(int group) => group == 1 ? Reaction1.Games : group == 2 ? BrainProtocol.Games : group == 3 ? Board3.Games : new int[0];
     }
 
     /// <summary>야추 hands, used by YachtGame (client) and the server's YachtRules so both rank dice the same way.</summary>

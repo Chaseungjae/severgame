@@ -20,7 +20,7 @@ namespace MiniParty.Server
             msg = default;
             var f = body.Split('|');
             if (f.Length != 7 || f[0] != "MSG") return false;
-            if (!byte.TryParse(f[1], out byte type) || type < 1 || type > 7) return false;
+            if (!byte.TryParse(f[1], out byte type) || type < 1 || type > (byte)WireMsg.Input) return false;
             if (!int.TryParse(f[2], out msg.A) || !int.TryParse(f[3], out msg.B) || !int.TryParse(f[4], out msg.C)
                 || !int.TryParse(f[5], out msg.D)) return false;
             if (!float.TryParse(f[6], NumberStyles.Float, CultureInfo.InvariantCulture, out msg.F) || float.IsNaN(msg.F) || float.IsInfinity(msg.F)) return false;

@@ -19,6 +19,8 @@ namespace MiniParty
         int LocalIndex { get; }
         bool Disconnected { get; }
         void SendAction(GameAction action);
+        /// <summary>UDP 게임 서버: 액션이 아닌 입력(확정 전 숫자 등)을 서버 터미널에만 기록. 상대에게는 가지 않는다.</summary>
+        void ReportInput(GameAction input);
     }
 
     /// <summary>
@@ -87,6 +89,13 @@ namespace MiniParty
             Net?.SendAction(act);
             Handle(act);
         }
+
+        /// <summary>
+        /// Online (UDP game server) only: tells the server about an input that is not an action (e.g. a digit typed
+        /// before confirming), so the server terminal shows every input. The opponent never receives it.
+        /// </summary>
+        protected void ReportInput(int kind, int player, int a = 0, float f = 0f) =>
+            Net?.ReportInput(new GameAction { Kind = kind, Player = player, A = a, F = f });
 
         /// <summary>Called by the network layer with the opponent's actions.</summary>
         public void ReceiveAction(GameAction act) => Handle(act);
